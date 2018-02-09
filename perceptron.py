@@ -23,9 +23,9 @@ class Perceptron():
                     scores[curr_class] += self.weights[curr_class][tok]
     
         best_score = -float("inf")
-        best_class = "X"
+        best_class = "None"
         for curr_class,score in scores.items():
-            if score > best_score or (score == best_score and curr_class < best_class):
+            if score >= best_score:
                 best_score = score
                 best_class = curr_class
         return best_class
@@ -41,11 +41,11 @@ class Perceptron():
         Returns:
             The predicted class, represented as a string.
         """
-        p = self.predict(x)
-        if y not in self.weights:
-            self.weights[y] = {}
-            self.acc[y] = {}           
+        p = self.predict(x)          
         if not p == y:
+            if y not in self.weights:
+                self.weights[y] = {}
+                self.acc[y] = {}
             if p not in self.weights:
                 self.weights[p] = {}
                 self.acc[p] = {} 

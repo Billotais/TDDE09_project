@@ -10,6 +10,8 @@ def load_data(filename):
                 data.append([])
             elif line.split()[0].isdigit():
                 data[-1].append((line.split()[1], line.split()[3]))
+    if not data[-1]:
+        data = data[:-1]
     return data
 
 def accuracy(classifier, data):
@@ -32,7 +34,7 @@ dev_data = load_data("../UD_English/en-ud-dev.conllu")
 train_data = load_data("../UD_English/en-ud-train.conllu")
 
 tagger = Tagger()
-tagger.train(train_data, 2)
+tagger.train(train_data, 1)
 
 print("Dev-Accuracy {:.2%}".format(accuracy(tagger, dev_data)))
 print("Test-Accuracy {:.2%}".format(accuracy(tagger, test_data)))
