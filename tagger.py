@@ -32,7 +32,36 @@ class Tagger():
             A feature vector for the specified configuration.
         """
         features = []
-        features.append("w_0="+words[i])
+        for n in range(4):
+            features.append("w_0="+words[i])
+        if words[i][0] == words[i][0].upper():
+            features.append("capital_word")
+        if words[i] == words[i].lower():
+            features.append("lowercase")
+        if i > 0:
+            features.append("t_-1="+pred_tags[i-1])
+            features.append("suff1_-1="+words[i-1][-1])
+            features.append("suff2_-1="+words[i-1][-2:])
+            features.append("suff3_-1="+words[i-1][-3:])
+            features.append("pre2_-1="+words[i-1][:2])
+        if i+1 < len(words):
+            features.append("w_1"+words[i+1])
+            features.append("suff1_1="+words[i+1][-1])
+            features.append("suff2_1="+words[i+1][-2:])
+            features.append("suff3_1="+words[i+1][-3:])
+            features.append("pre1_1="+words[i+1][0])
+            features.append("pre2_1="+words[i+1][:2])
+            features.append("pre3_1="+words[i+1][:3])
+        if i+2 < len(words):
+            features.append("w_2"+words[i+2])
+        if i+3 < len(words):
+            features.append("w_3"+words[i+3])
+        features.append("suff1_0="+words[i][-1])
+        features.append("suff2_0="+words[i][-2:])
+        features.append("suff3_0="+words[i][-3:])
+        features.append("pre1_0="+words[i][0])
+        features.append("pre2_0="+words[i][:2])
+        features.append("pre3_0="+words[i][:3])
         return features
 
     def tag(self, words):
