@@ -6,7 +6,7 @@ class Perceptron():
         self.acc = {}
         self.count = 1
 
-    def predict(self, x):
+    def predict(self, x, candidates=None):
         """Predicts the class for a document.
 
         Args:
@@ -17,10 +17,11 @@ class Perceptron():
         """
         scores = {}
         for curr_class in self.weights:
-            scores[curr_class] = 0
-            for tok in x:
-                if tok in self.weights[curr_class]:
-                    scores[curr_class] += self.weights[curr_class][tok]
+            if not candidates or curr_class in candidates:
+                scores[curr_class] = 0
+                for tok in x:
+                    if tok in self.weights[curr_class]:
+                        scores[curr_class] += self.weights[curr_class][tok]
     
         best_score = -float("inf")
         best_class = "None"
