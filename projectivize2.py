@@ -27,12 +27,11 @@ def calc_score_matrix(sentence, parent):
     for i in range(len(sentence)):
         cost = 0
         ancestor = parent[i]
-        if ancestor == 0:
-            A[i][ancestor] = cost
         while ancestor != 0:
             A[i][ancestor] = cost
             ancestor = parent[ancestor]
             cost -= 1
+        A[i][ancestor] = cost
     return A
 
 
@@ -50,37 +49,38 @@ def eisner(sentence, A):
                 if curr_score > best_score:
                     best_score = curr_score
             T4[i][k] = best_score
+            print(T4)
             best_score = float("-inf")
             for j in range(i, k):
                 curr_score = T2[i][j] + T1[j+1][k] + A[k][i]
                 if curr_score > best_score:
                     best_score = curr_score
             T3[i][k] = best_score
+            print(T3)
             best_score = float("-inf")
             for j in range (i+1, k+1):
                 curr_score = T4[i][j] + T2[j][k]
                 if curr_score > best_score:
                     best_score = curr_score
             T2[i][k] = best_score
+            print(T2)
             best_score = float("-inf")
             for j in range(i, k):
                 curr_score =  T1[i][j] + T3[j][k]
                 if curr_score > best_score:
                     best_score = curr_score
             T1[i][k] = best_score
-        print(T1)
-        print(T2)
-        print(T3)
-        print(T4)
+            print(T1)
         print("\n\n")
     exit()
     if T2[0][-1] != 0:
         print(T2[0][-1])
 
-sentence = ["Hallo","Welt"]
+sentence = ["ROOT","Hallo"]
 parent = [0,0]
 A = calc_score_matrix(sentence, parent)
-print(A)
+#A = np.ones((3,3))
+print(A,"\n")
 eisner(sentence, A)
 exit()
 
