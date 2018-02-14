@@ -27,6 +27,8 @@ def calc_score_matrix(sentence, parent):
     for i in range(len(sentence)):
         cost = 0
         ancestor = parent[i]
+        if ancestor == 0:
+            A[i][ancestor] = cost
         while ancestor != 0:
             A[i][ancestor] = cost
             ancestor = parent[ancestor]
@@ -36,31 +38,21 @@ def calc_score_matrix(sentence, parent):
 
 def eisner(sentence, A):
     n = len(sentence)
-    """
     T1 = np.zeros((n,n))
     T2 = np.zeros((n,n))
-    T3 = np.ones((n,n))*float("-inf")
-    T4 = np.ones((n,n))*float("-inf")
-    """
-    T1 = np.ones((n,n))*float("-inf")
-    T2 = np.ones((n,n))*float("-inf")
-    T3 = np.ones((n,n))*float("-inf")
-    T4 = np.ones((n,n))*float("-inf")
-    np.fill_diagonal(T1, 0)
-    np.fill_diagonal(T2, 0)
-    np.fill_diagonal(T3, 0)
-    np.fill_diagonal(T4, 0)
-    for k in range(0, n):
-        for i in range(k-2, 0):
+    T3 = np.zeros((n,n))
+    T4 = np.zeros((n,n))
+    for k in range(1, n):
+        for i in range(k-1, -1, -1):
             best_score = float("-inf")
-            for j in range(i, k-1+1):
+            for j in range(i, k):
                 curr_score = T2[i][j] + T1[j+1][k] + A[i][k]
                 if curr_score > best_score:
                     best_score = curr_score
             T4[i][k] = best_score
             best_score = float("-inf")
-            for j in range(i, k-1+1):
-                curr_score =  T2[i][j] + T1[j+1][k] + A[k][i]
+            for j in range(i, k):
+                curr_score = T2[i][j] + T1[j+1][k] + A[k][i]
                 if curr_score > best_score:
                     best_score = curr_score
             T3[i][k] = best_score
@@ -71,16 +63,28 @@ def eisner(sentence, A):
                     best_score = curr_score
             T2[i][k] = best_score
             best_score = float("-inf")
-            for j in range(i, k-1+1):
+            for j in range(i, k):
                 curr_score =  T1[i][j] + T3[j][k]
                 if curr_score > best_score:
                     best_score = curr_score
             T1[i][k] = best_score
-        if T2[0][-1] != 0:
-            print(T2[0][-1])
+        print(T1)
+        print(T2)
+        print(T3)
+        print(T4)
+        print("\n\n")
+    exit()
+    if T2[0][-1] != 0:
+        print(T2[0][-1])
 
+sentence = ["Hallo","Welt"]
+parent = [0,0]
+A = calc_score_matrix(sentence, parent)
+print(A)
+eisner(sentence, A)
+exit()
 
-dev_data = load_data("../UD_English/en-ud-train.conllu")
+dev_data = load_data("../UD_English/en-ud-dev-projective.conllu")
 
 for sentence, parent in trees(dev_data):
     A = calc_score_matrix(sentence, parent)
