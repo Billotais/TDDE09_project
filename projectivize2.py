@@ -14,17 +14,15 @@ def load_data(filename):
 
 def trees(data):
     for sentence in data:
-        out = ([], [])
-        out[0].append("<ROOT>")
-        out[1].append(0)
+        out = []
+        out.append(0)
         for word in sentence:
-            out[0].append(word[1])
-            out[1].append(int(word[6]))
+            out.append(int(word[6]))
         yield out
 
-def calc_score_matrix(sentence, parent):
-    A = np.ones((len(sentence), len(sentence)))*float("-inf")
-    for i in range(len(sentence)):
+def calc_score_matrix(parent):
+    A = np.ones((len(parent), len(parent)))*float("-inf")
+    for i in range(len(parent)):
         cost = 0
         ancestor = parent[i]
         while ancestor != 0:
@@ -52,8 +50,8 @@ def restore_tree(tree, T1_back, T2_back, T3_back, T4_back, T_name_in, inds_in):
                                     T_name_out, inds_out)
     return tree
 
-def eisner(sentence, A):
-    n = len(sentence)
+def eisner(A):
+    n = len(A)
     T1 = np.zeros((n,n))
     T2 = np.zeros((n,n))
     T3 = np.zeros((n,n))
@@ -95,11 +93,27 @@ def eisner(sentence, A):
     tree = restore_tree([0]*n, T1_back, T2_back, T3_back, T4_back, "T2", (0, n-1))
     return tree
 
-#dev_data = load_data("../UD_English/en-ud-dev-projective.conllu")
-dev_data = load_data("../UD_English/en-ud-dev.conllu")
+def projectivize(dev_data):
+    for parent, sentence in zip(trees(dev_data), dev_data):
+        A = calc_score_matrix(parent)
+        proj_parent = eisner(A)
+        for i in range(len(sentence)):
+            sentence[i][6] = str(proj_parent[i+1])
+        for word in sentence:
+            print("\t".join(word))
+        print("")
 
-for sentence, parent in trees(dev_data):
-    A = calc_score_matrix(sentence, parent)
-    proj_parent = eisner(sentence, A)
-    if proj_parent != parent:
-        print(proj_parent, parent)
+def cmd_projectivize():
+    import sys
+    data = [[]]
+    for line in sys.stdin:
+        if len(line) == 1:
+            data.append([])
+        elif line.split()[0].isdigit():
+            data[-1].append(line.split())
+    if not data[-1]:
+        data = data[:-1]
+    projectivize(data)
+
+if __name__ == "__main__":
+    cmd_projectivize()
