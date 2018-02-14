@@ -1,17 +1,3 @@
-import numpy as np
-
-def load_data(filename):
-    data = [[]]
-    with open(filename) as source:
-        for line in source:
-            if len(line) == 1:
-                data.append([])
-            elif line.split()[0].isdigit():
-                data[-1].append(line.split())
-    if not data[-1]:
-        data = data[:-1]
-    return data
-
 def trees(data):
     for sentence in data:
         out = []
@@ -21,15 +7,16 @@ def trees(data):
         yield out
 
 def calc_score_matrix(parent):
-    A = np.ones((len(parent), len(parent)))*float("-inf")
+    n = len(parent)
+    A = {i: {j: float("-inf") for j in range(n)} for i in range(n)}
     for i in range(len(parent)):
-        cost = 0
+        score = 0
         ancestor = parent[i]
         while ancestor != 0:
-            A[ancestor][i] = cost
+            A[ancestor][i] = score
             ancestor = parent[ancestor]
-            cost -= 1
-        A[ancestor][i] = cost
+            score -= 1
+        A[ancestor][i] = score
     return A
 
 def restore_tree(tree, T1_back, T2_back, T3_back, T4_back, T_name_in, inds_in):
@@ -52,10 +39,10 @@ def restore_tree(tree, T1_back, T2_back, T3_back, T4_back, T_name_in, inds_in):
 
 def eisner(A):
     n = len(A)
-    T1 = np.zeros((n,n))
-    T2 = np.zeros((n,n))
-    T3 = np.zeros((n,n))
-    T4 = np.zeros((n,n))
+    T1 = {i: {i: 0} for i in range(n)}
+    T2 = {i: {i: 0} for i in range(n)}
+    T3 = {i: {} for i in range(n)}
+    T4 = {i: {} for i in range(n)}
     T1_back = {i: {} for i in range(n)}
     T2_back = {i: {} for i in range(n)}
     T3_back = {i: {} for i in range(n)}
@@ -93,8 +80,8 @@ def eisner(A):
     tree = restore_tree([0]*n, T1_back, T2_back, T3_back, T4_back, "T2", (0, n-1))
     return tree
 
-def projectivize(dev_data):
-    for parent, sentence in zip(trees(dev_data), dev_data):
+def projectivize(data):
+    for parent, sentence in zip(trees(data), data):
         A = calc_score_matrix(parent)
         proj_parent = eisner(A)
         for i in range(len(sentence)):
