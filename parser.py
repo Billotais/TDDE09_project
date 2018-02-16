@@ -1,5 +1,7 @@
 from perceptron import Perceptron
 from tagger import Tagger
+from projectivize2 import projectivize
+from nlp_tools import get_sentences, get_tags, get_trees
 
 class Parser():
     """A transition-based dependency parser.
@@ -28,9 +30,9 @@ class Parser():
             predict the next move of the parser.
     """
     
-    def __init__(self):
+    def __init__(self, tagger):
         """Initialises a new parser."""
-        self.tagger = Tagger()
+        self.tagger = tagger
         self.classifier = Perceptron()
     
     def parse(self, words):
@@ -118,17 +120,38 @@ class Parser():
             A pair consisting of the predicted tags and the predicted
             dependency tree for the input sentence.
         """
-        tags = self.tagger.update(words, gold_tags)
+        tags = self.tagger.tag(words)
         pred_tree = [0] * len(words)
         stack = []
         i = 0
         while self.valid_moves(i, stack, pred_tree):
-            feat = self.features(words, gold_tags, i, stack, pred_tree)
+            feat = self.features(words, tags, i, stack, pred_tree)
             gold_move = self.gold_move(i, stack, pred_tree, gold_tree)
             move = self.classifier.update(feat,gold_move)
             i, stack, pred_tree = self.move(i, stack, pred_tree, gold_move)
         return tags, pred_tree
     
+    def train(self, data, n_epochs=1, trunc_data=None):
+        """Train a new tagger on training data.
+
+        Args:
+            data: Training data, a list of tagged sentences.
+        """
+        print("Training syntactic parser:")
+        for e in range(n_epochs):
+            print("Epoch:", e+1, "/", n_epochs)
+            train_sentences_tags_trees = zip(   get_sentences(projectivize(data)), \
+                                                get_tags(projectivize(data)), \
+                                                get_trees(projectivize(data) ))
+            for i, (words, gold_tags, gold_tree) in enumerate(train_sentences_tags_trees):
+                self.update(words, gold_tags, gold_tree)
+                print("\rUpdated with sentence #{}".format(i), end="")
+                if trunc_data and i >= trunc_data:
+                    break
+            print("")
+        self.finalize()
+        self.finalize()
+
     def gold_move(self, i, stack, pred_tree, gold_tree):
         """Returns the gold-standard move for the specified parser
         configuration.
@@ -215,5 +238,4 @@ class Parser():
     
     def finalize(self):
         """Averages the weight vectors."""
-        self.tagger.finalize()
         self.classifier.finalize()

@@ -1,4 +1,5 @@
 from perceptron import Perceptron
+from nlp_tools import get_sentences, get_tags
 
 class Tagger():
     """A part-of-speech tagger based on a multi-class perceptron
@@ -96,20 +97,23 @@ class Tagger():
             pred_tags.append(self.classifier.update(feat, gold_tags[i]))
         return pred_tags
 
-    def train(self, data, n_epochs=1):
+    def train(self, data, n_epochs=1, trunc_data=None):
         """Train a new tagger on training data.
 
         Args:
             data: Training data, a list of tagged sentences.
         """
+        
+        print("Training POS tagger")
         for e in range(n_epochs):
-            for sentence in data:
-                words = []
-                tags = []
-                for word in sentence:
-                    words.append(word[0])
-                    tags.append(word[1])
+            print("Epoch:", e+1, "/", n_epochs)
+            train_sentences_tags = zip( get_sentences(data), get_tags(data) )
+            for i, (words, tags) in enumerate(train_sentences_tags):
+                print("\rUpdated with sentence #{}".format(i), end="")
                 pred_tags = self.update(words,tags)
+                if trunc_data and i >= trunc_data:
+                    break
+            print("")
         self.finalize()
 
     def finalize(self):

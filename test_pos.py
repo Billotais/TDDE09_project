@@ -1,29 +1,13 @@
 # test file for POS tagging
 
 from tagger import Tagger
-
-def load_data(filename):
-    data = [[]]
-    with open(filename) as source:
-        for line in source:
-            if len(line) == 1: 
-                data.append([])
-            elif line.split()[0].isdigit():
-                data[-1].append((line.split()[1], line.split()[3]))
-    if not data[-1]:
-        data = data[:-1]
-    return data
+from nlp_tools import load_data, get_sentences, get_tags
 
 def accuracy(classifier, data):
     correct = 0
     len_data = 0
-    for item in data:
-        sentence = []
-        gold_tags = []
-        len_data += len(item)
-        for i in range(len(item)):
-            sentence.append(item[i][0])
-            gold_tags.append(item[i][1])
+    for sentence, gold_tags in zip( get_sentences(data), get_tags(data) ):
+        len_data += len(sentence)
         for pred_tag,gold_tag in zip(classifier.tag(sentence), gold_tags):
             if pred_tag == gold_tag:
                 correct += 1

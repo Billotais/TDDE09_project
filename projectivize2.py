@@ -1,10 +1,4 @@
-def trees(data):
-    for sentence in data:
-        out = []
-        out.append(0)
-        for word in sentence:
-            out.append(int(word[6]))
-        yield out
+from nlp_tools import get_trees
 
 def calc_score_matrix(parent):
     n = len(parent)
@@ -81,14 +75,12 @@ def eisner(A):
     return tree
 
 def projectivize(data):
-    for parent, sentence in zip(trees(data), data):
+    for parent, sentence in zip(get_trees(data), data):
         A = calc_score_matrix(parent)
         proj_parent = eisner(A)
         for i in range(len(sentence)):
             sentence[i][6] = str(proj_parent[i+1])
-        for word in sentence:
-            print("\t".join(word))
-        print("")
+        yield sentence
 
 def cmd_projectivize():
     import sys
@@ -100,7 +92,10 @@ def cmd_projectivize():
             data[-1].append(line.split())
     if not data[-1]:
         data = data[:-1]
-    projectivize(data)
+    for sentence in projectivize(data):
+        for word in sentence:
+            print("\t".join(word))
+        print("")
 
 if __name__ == "__main__":
     cmd_projectivize()
