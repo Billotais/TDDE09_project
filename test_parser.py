@@ -3,22 +3,25 @@ from tagger import Tagger
 from projectivize2 import projectivize
 from nlp_tools import load_data, get_sentences, get_tags, get_trees
 
-n_examples = 200    # Set to None to train on all examples
-#n_examples = None    # Set to None to train on all examples
+#n_examples = 200    # Set to None to train on all examples
+n_examples = None    # Set to None to train on all examples
 
 train_data = load_data("../UD_English/en-ud-train.conllu")
+do_projectivize = True
+#train_data = load_data("../UD_English/en-ud-train-projective.conllu")
+#do_projectivize = False
 tagger = Tagger()
 tagger.train(train_data, 1)
 
 parser = Parser(tagger)
-parser.train(train_data, 1, n_examples)
+parser.train(train_data, 1, do_projectivize, n_examples)
 
 acc_k = acc_n = 0
 uas_k = uas_n = 0
 dev_data = load_data("../UD_English/en-ud-dev.conllu")
-dev_sentences_tags_trees = zip( get_sentences(projectivize(dev_data)), \
-                                get_tags(projectivize(dev_data)), \
-                                get_trees(projectivize(dev_data) ))
+dev_sentences_tags_trees = zip( get_sentences(dev_data), \
+                                get_tags(dev_data), \
+                                get_trees(dev_data) )
 for i, (words, gold_tags, gold_tree) in enumerate(dev_sentences_tags_trees):
     pred_tags, pred_tree = parser.parse(words)
     acc_k += sum(int(g == p) for g, p in zip(gold_tags, pred_tags)) - 1

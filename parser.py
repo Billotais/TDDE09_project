@@ -131,7 +131,7 @@ class Parser():
             i, stack, pred_tree = self.move(i, stack, pred_tree, gold_move)
         return tags, pred_tree
     
-    def train(self, data, n_epochs=1, trunc_data=None):
+    def train(self, data, n_epochs=1, do_projectivize=True, trunc_data=None):
         """Train a new tagger on training data.
 
         Args:
@@ -140,9 +140,14 @@ class Parser():
         print("Training syntactic parser:")
         for e in range(n_epochs):
             print("Epoch:", e+1, "/", n_epochs)
-            train_sentences_tags_trees = zip(   get_sentences(projectivize(data)), \
-                                                get_tags(projectivize(data)), \
-                                                get_trees(projectivize(data) ))
+            if do_projectivize:
+                train_sentences_tags_trees = zip(   get_sentences(projectivize(data)), \
+                                                    get_tags(projectivize(data)), \
+                                                    get_trees(projectivize(data)) )
+            else:
+                train_sentences_tags_trees = zip(   get_sentences(data), \
+                                                    get_tags(data), \
+                                                    get_trees(data) )
             for i, (words, gold_tags, gold_tree) in enumerate(train_sentences_tags_trees):
                 self.update(words, gold_tags, gold_tree)
                 print("\rUpdated with sentence #{}".format(i), end="")
