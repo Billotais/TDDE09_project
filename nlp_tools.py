@@ -1,6 +1,6 @@
 def load_data(filename):
     data = [[]]
-    with open(filename) as source:
+    with open(filename, encoding='utf-8') as source:
         for line in source:
             if len(line) == 1: 
                 data.append([])
