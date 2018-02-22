@@ -1,14 +1,14 @@
 ### Clone the Universial Dependencies treebanks:
-    $ git clone https://github.com/UniversalDependencies/UD_Swedish-Talbanken.git
+$ git clone https://github.com/UniversalDependencies/UD_Swedish-Talbanken.git
 
-    $ git clone https://github.com/UniversalDependencies/UD_English-EWT.git
+$ git clone https://github.com/UniversalDependencies/UD_English-EWT.git
 
 ### Clone the baseline system:
-    $ git clone git@gitlab.ida.liu.se:nlp2018-group3/baseline-system.git
+$ git clone git@gitlab.ida.liu.se:nlp2018-group3/baseline-system.git
 
-    $ cd baseline-system
+$ cd baseline-system
 
-    $ python evaluate_on_english_treebank.py
+$ python evaluate_on_english_treebank.py
     Training POS tagger
     Epoch: 1 / 3
     Updated with sentence #12542
@@ -28,7 +28,7 @@
     Unlabelled attachment score: 52.66%
 
 
-    $ python evaluate_on_swedish_treebank.py
+$ python evaluate_on_swedish_treebank.py
     Training POS tagger
     Epoch: 1 / 3
     Updated with sentence #4302
