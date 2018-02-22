@@ -30,7 +30,7 @@
     Unlabelled attachment score: 52.66%
 
 ### Evaluate the system on the Swedish Universial Dependencies treebank
-`python evaluate_system.py ../UD_Swedish-Talbanken/sv-ud-train.conllu ../UD_Swedish-Talbanken/sv-ud-dev.conllu`
+`$ python evaluate_system.py ../UD_Swedish-Talbanken/sv-ud-train.conllu ../UD_Swedish-Talbanken/sv-ud-dev.conllu`
 
     Training POS tagger
     Epoch: 1 / 3
