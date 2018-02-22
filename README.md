@@ -1,12 +1,12 @@
 ### Clone the Universial Dependencies treebanks:
-$ git clone https://github.com/UniversalDependencies/UD_Swedish-Talbanken.git
+`$ git clone https://github.com/UniversalDependencies/UD_Swedish-Talbanken.git`
 
-$ git clone https://github.com/UniversalDependencies/UD_English-EWT.git
+`$ git clone https://github.com/UniversalDependencies/UD_English-EWT.git`
 
 ### Clone the baseline system:
-$ git clone git@gitlab.ida.liu.se:nlp2018-group3/baseline-system.git
+`$ git clone git@gitlab.ida.liu.se:nlp2018-group3/baseline-system.git`
 
-$ cd baseline-system
+`$ cd baseline-system`
 
 `$ python evaluate_system.py ../UD_English-EWT/en-ud-train.conllu ../UD_English-EWT/en-ud-dev.conllu`
 
@@ -29,7 +29,7 @@ $ cd baseline-system
     Unlabelled attachment score: 52.66%
 
 
-$ python evaluate_on_swedish_treebank.py
+`python evaluate_system.py ../UD_Swedish-Talbanken/sv-ud-train.conllu ../UD_Swedish-Talbanken/sv-ud-dev.conllu`
 
     Training POS tagger
     Epoch: 1 / 3
