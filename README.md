@@ -8,7 +8,7 @@ $ git clone git@gitlab.ida.liu.se:nlp2018-group3/baseline-system.git
 
 $ cd baseline-system
 
-$ python evaluate_on_english_treebank.py
+`$ python evaluate_system.py ../UD_English-EWT/en-ud-train.conllu ../UD_English-EWT/en-ud-dev.conllu`
 
     Training POS tagger
     Epoch: 1 / 3
