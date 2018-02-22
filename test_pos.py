@@ -13,12 +13,10 @@ def accuracy(classifier, data):
                 correct += 1
     return(correct/len_data)
 
-test_data = load_data("../UD_English/en-ud-test.conllu")
-dev_data = load_data("../UD_English/en-ud-dev.conllu")
-train_data = load_data("../UD_English/en-ud-train.conllu")
+dev_data = load_data("../UD_English-EWT/en-ud-dev.conllu")
+train_data = load_data("../UD_English-EWT/en-ud-train.conllu")
 
 tagger = Tagger()
 tagger.train(train_data, 1)
 
 print("Dev-Accuracy {:.2%}".format(accuracy(tagger, dev_data)))
-print("Test-Accuracy {:.2%}".format(accuracy(tagger, test_data)))

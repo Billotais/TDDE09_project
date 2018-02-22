@@ -5,7 +5,7 @@ def load_data(filename):
             if len(line) == 1: 
                 data.append([])
             elif line.split()[0].isdigit():
-                data[-1].append(line.split())
+                data[-1].append(line.split('\t'))
     if not data[-1]:
         data = data[:-1]
     return data
