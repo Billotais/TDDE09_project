@@ -5,16 +5,16 @@ from nlp_tools import get_sentences, get_tags, get_trees
 
 class Parser():
     """A transition-based dependency parser.
-    
+
     This parser implements the arc-standard algorithm for dependency
     parsing. When being presented with an input sentence, it first
     tags the sentence for parts of speech, and then uses a multi-class
     perceptron classifier to predict a sequence of *moves*
     (transitions) that construct a dependency tree for the input
     sentence. Moves are encoded as integers as follows:
-    
+
     SHIFT = 0, LEFT-ARC = 1, RIGHT-ARC = 2
-    
+
     At any given point in the predicted sequence, the state of the
     parser can be specified by: the index of the first word in the
     input sentence that the parser has not yet started to process; a
@@ -23,24 +23,24 @@ class Parser():
     indices such that `tree[i]` gives the index of the head (parent
     node) of the word at position `i`, or 0 in case the corresponding
     word has not yet been assigned a head.
-    
+
     Attributes:
         tagger: A part-of-speech tagger.
         classifier: A multi-class perceptron classifier used to
             predict the next move of the parser.
     """
-    
+
     def __init__(self, tagger):
         """Initialises a new parser."""
         self.tagger = tagger
         self.classifier = Perceptron()
-    
+
     def parse(self, words):
         """Parses a sentence.
-        
+
         Args:
             words: The input sentence, a list of words.
-        
+
         Returns:
             A pair consisting of the predicted tags and the predicted
             dependency tree for the input sentence.
@@ -56,17 +56,17 @@ class Parser():
             move = self.classifier.predict(feat, candidates)
             i, stack, pred_tree = self.move(i, stack, pred_tree, move)
         return tags, pred_tree
-    
+
     def valid_moves(self, i, stack, pred_tree):
         """Returns the valid moves for the specified parser
         configuration.
-        
+
         Args:
             i: The index of the first unprocessed word.
             stack: The stack of words (represented by their indices)
                 that are currently being processed.
             pred_tree: The partial dependency tree.
-        
+
         Returns:
             The list of valid moves for the specified parser
                 configuration.
@@ -79,17 +79,17 @@ class Parser():
         if len(stack) > 1:
             moves.append(2)
         return moves
-    
+
     def move(self, i, stack, pred_tree, move):
         """Executes a single move.
-        
+
         Args:
             i: The index of the first unprocessed word.
             stack: The stack of words (represented by their indices)
                 that are currently being processed.
             pred_tree: The partial dependency tree.
             move: The move that the parser should make.
-        
+
         Returns:
             The new parser configuration, represented as a triple
             containing the index of the new first unprocessed word,
@@ -105,17 +105,17 @@ class Parser():
             pred_tree[stack[-1]] = stack[-2]
             del stack[-1]
         return i, stack, pred_tree
-    
+
     def update(self, words, gold_tags, gold_tree):
         """Updates the move classifier with a single training
         instance.
-        
+
         Args:
             words: The input sentence, a list of words.
             gold_tags: The list of gold-standard tags for the input
                 sentence.
             gold_tree: The gold-standard tree for the sentence.
-        
+
         Returns:
             A pair consisting of the predicted tags and the predicted
             dependency tree for the input sentence.
@@ -130,12 +130,15 @@ class Parser():
             move = self.classifier.update(feat,gold_move)
             i, stack, pred_tree = self.move(i, stack, pred_tree, gold_move)
         return tags, pred_tree
-    
+
     def train(self, data, n_epochs=1, do_projectivize=True, trunc_data=None):
-        """Train a new tagger on training data.
+        """Trains the parser on training data.
 
         Args:
-            data: Training data, a list of tagged sentences.
+            data: Training data, a list of sentences with gold trees.
+            n_epochs:
+            do_projectivize:
+            trunc_data:
         """
         print("Training syntactic parser:")
         for e in range(n_epochs):
@@ -155,12 +158,11 @@ class Parser():
                     break
             print("")
         self.finalize()
-        self.finalize()
 
     def gold_move(self, i, stack, pred_tree, gold_tree):
         """Returns the gold-standard move for the specified parser
         configuration.
-        
+
         The gold-standard move is the first possible move from the
         following list: LEFT-ARC, RIGHT-ARC, SHIFT. LEFT-ARC is
         possible if the topmost word on the stack is the gold-standard
@@ -170,14 +172,14 @@ class Parser():
         Symmetric conditions apply to RIGHT-ARC. SHIFT is possible if
         at least one word in the input sentence still requires
         processing.
-        
+
         Args:
             i: The index of the first unprocessed word.
             stack: The stack of words (represented by their indices)
                 that are currently being processed.
             pred_tree: The partial dependency tree.
             gold_tree: The gold-standard dependency tree.
-        
+
         Returns:
             The gold-standard move for the specified parser
             configuration, or `None` if no move is possible.
@@ -204,7 +206,7 @@ class Parser():
             return 0
         else:
             return None
-    
+
     def features(self, words, tags, i, stack, parse):
         """Extracts features for the specified parser configuration.
 
@@ -240,7 +242,7 @@ class Parser():
             feat.append((4, '<EMPTY>'))
             feat.append((5, '<EMPTY>'))
         return feat
-    
+
     def finalize(self):
         """Averages the weight vectors."""
         self.classifier.finalize()
