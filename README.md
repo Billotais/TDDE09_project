@@ -4,7 +4,7 @@ for a more detailed explanation of each class, refer to the
 documentation.
 
 ## Setup
-In order be able to use our baseline system it is necessary to
+In order be able to use our advanced system it is necessary to
 retrieve data from the Universal Dependencies treebanks. 
 Therefore, clone the treebanks you are interested in.
 Our example includes the English and the Swedish dataset. 
@@ -29,7 +29,7 @@ with Python 3.6.
 
 
 ## Run
-In order to run the baseline system, simply run <br>
+In order to run the advanced system, simply run <br>
 `$ python3 evaluate_system.py ../UD_English-EWT/en-ud-train.conllu ../UD_English-EWT/en-ud-dev.conllu` 
 <br>for the English dataset and<br>
 `$ python3 evaluate_system.py ../UD_Swedish-Talbanken/sv-ud-train.conllu ../UD_Swedish-Talbanken/sv-ud-dev.conllu`
