@@ -1,5 +1,5 @@
 # Get up and running
-This is a guide to get started as quickly as possible with the baseline system,
+This is a guide to get started as quickly as possible with the advanced system,
 for a more detailed explanation of each class, refer to the
 documentation.
 
