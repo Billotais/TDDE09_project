@@ -10,6 +10,15 @@ def load_data(filename):
         data = data[:-1]
     return data
 
+def accuracy(preds, golds, correction=0):
+    count = -correction
+    score = -correction
+    for pred, gold in zip(preds, golds):
+        count += 1
+        if pred == gold:
+            score +=1
+    return score/count
+
 def get_sentences(data):
     for sentence in data:
         out = []
