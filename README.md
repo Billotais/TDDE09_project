@@ -27,7 +27,7 @@
     Updated with sentence #12542
     Evaluation:
     Tagging accuracy: 93.34%
-    Unlabelled attachment score: 52.66%
+    Unlabelled attachment score: 64.60%
 
 ### Evaluate the system on the Swedish Universial Dependencies treebank
 `$ python3 evaluate_system.py ../UD_Swedish-Talbanken/sv-ud-train.conllu ../UD_Swedish-Talbanken/sv-ud-dev.conllu`
@@ -48,5 +48,5 @@
     Updated with sentence #4302
     Evaluation:
     Tagging accuracy: 93.62%
-    Unlabelled attachment score: 49.57%
+    Unlabelled attachment score: 59.60%
 
