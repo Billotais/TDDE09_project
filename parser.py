@@ -1,5 +1,4 @@
 from perceptron import Perceptron
-from tagger import Tagger
 from projectivize2 import projectivize
 from nlp_tools import get_sentences, get_tags, get_trees
 

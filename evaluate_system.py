@@ -1,7 +1,6 @@
 import sys, itertools
 from parser import Parser
 from tagger import Tagger
-from projectivize2 import projectivize
 from nlp_tools import load_data, accuracy, get_sentences, get_tags, get_trees
 
 if len(sys.argv) != 3:

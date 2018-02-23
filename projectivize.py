@@ -1,8 +1,6 @@
 # Projectivize trees in the CoNLL-X format using lifting
 # Usage: python projectivize.py < CONLL > CONLL
 
-# Bonus: Count the number of projective trees
-
 def trees(fp):
     buffer = []
     for line in fp:
