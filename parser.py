@@ -301,6 +301,39 @@ class Parser():
         s1_t_s2_t = s1_t + " " + s2_t
         s1_t_b1_t = s1_t + " " + b1_t
 
+         # Triple word features
+        def is_parent(parent, child):
+            if child == 0:
+                return False
+            if parent == child:
+                return True
+            return is_parent(parent, parse[child])
+
+        def lc1(parent):
+            for i in range(0, len(words)):
+                if is_parent(parent, i):
+                    return i
+            return -1
+        def rc1(parent):
+            for i in range(0, len(words), -1):
+                if is_parent(parent, i):
+                    return i
+            return -1
+
+        lc1_s1 = lc1(words[stack[-1]]) if stack else -1
+        rc1_s1 = rc1(words[stack[-1]]) if stack else -1
+        lc1_s2 = lc1(words[stack[-2]]) if len(stack) > 1 else -1
+        rc1_s2 = rc1(words[stack[-2]]) if len(stack) > 1 else -1
+
+        s2_t_s1_t_b1_t = s2_t + " " + s1_t + " " + b1_t
+        s2_t_s1_t_lc1_s1_t = s2_t + " " + s1_t + " " + tags[lc1_s1] if lc1_s1 >= 0 else "<empty>"
+        s2_t_s1_t_rc1_s1_t = s2_t + " " + s1_t + " " + tags[rc1_s1] if rc1_s1 >= 0 else "<empty>"
+        s2_t_s1_t_lc1_s2_t = s2_t + " " + s1_t + " " + tags[rc1_s2] if lc1_s2 >= 0 else "<empty>"
+        s2_t_s1_t_rc1_s2_t = s2_t + " " + s1_t + " " + tags[rc1_s2] if rc1_s2 >= 0 else "<empty>"
+        s2_t_s1_w_rc1_s2_t = s2_t + " " + s1_w + " " + tags[rc1_s2] if lc1_s2 >= 0 else "<empty>"
+        s2_t_s1_w_lc1_s1_t = s2_t + " " + s1_w + " " + tags[lc1_s1] if lc1_s1 >= 0 else "<empty>"
+        s2_t_s1_w_b1_t = s2_t + " " + s1_w + " " +  b1_t
+
         feat.append("b1_w:" + b1_w)
         feat.append("b1_t:" + b1_t)
         feat.append("b1_wt:" + b1_wt)
@@ -321,6 +354,15 @@ class Parser():
         feat.append("s1_w_s2_w:" + s1_w_s2_w)
         feat.append("s1_t_s2_t:" + s1_t_s2_t)
         feat.append("s1_t_b1_t:" + s1_t_b1_t)
+
+        feat.append("s2_t_s1_t_b1_t:" + s2_t_s1_t_b1_t)
+        feat.append("s2_t_s1_t_lc1_s1_t:" + s2_t_s1_t_lc1_s1_t)
+        feat.append("s2_t_s1_t_rc1_s1_t:" + s2_t_s1_t_rc1_s1_t)
+        feat.append("s2_t_s1_t_lc1_s2_t:" + s2_t_s1_t_lc1_s2_t)
+        feat.append("s2_t_s1_t_rc1_s2_t:" + s2_t_s1_t_rc1_s2_t)
+        feat.append("s2_t_s1_w_rc1_s2_t:" + s2_t_s1_w_rc1_s2_t)
+        feat.append("s2_t_s1_w_lc1_s1_t:" + s2_t_s1_w_lc1_s1_t)
+        feat.append("s2_t_s1_w_b1_t:" + s2_t_s1_w_b1_t) 
 
         return feat
 
