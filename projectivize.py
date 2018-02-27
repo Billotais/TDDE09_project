@@ -10,7 +10,7 @@ def trees(fp):
                 yield buffer
                 buffer = []
             else:
-                columns = line.split()
+                columns = line.split("\t")
                 if columns[0].isdigit(): # skip range tokens
                     buffer.append(columns)
 

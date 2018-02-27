@@ -1,5 +1,4 @@
 from perceptron import Perceptron
-from projectivize2 import projectivize
 from nlp_tools import get_sentences, get_tags, get_trees
 
 class Parser():
@@ -12,7 +11,7 @@ class Parser():
     (transitions) that construct a dependency tree for the input
     sentence. Moves are encoded as integers as follows:
 
-    SHIFT = 0, LEFT-ARC = 1, RIGHT-ARC = 2
+    SHIFT = 0, LEFT-ARC = 1, RIGHT-ARC = 2, SWAP = 3
 
     At any given point in the predicted sequence, the state of the
     parser can be specified by: the index of the first word in the
@@ -44,24 +43,23 @@ class Parser():
             A pair consisting of the predicted tags and the predicted
             dependency tree for the input sentence.
         """
-        #"""
         tags = self.tagger.tag(words)
         pred_tree = [0] * len(words)
         stack = []
-        i = 0
-        while self.valid_moves(i, stack, pred_tree):
-            feat = self.features(words, tags, i, stack, pred_tree)
-            candidates = self.valid_moves(i, stack, pred_tree)
+        buffer = list(range(len(words)))
+        while self.valid_moves(buffer, stack, pred_tree):
+            feat = self.features(words, tags, buffer, stack, pred_tree)
+            candidates = self.valid_moves(buffer, stack, pred_tree)
             move = self.classifier.predict(feat, candidates)
-            i, stack, pred_tree = self.move(i, stack, pred_tree, move)
+            buffer, stack, pred_tree = self.move(buffer, stack, pred_tree, move)
         return tags, pred_tree
 
-    def valid_moves(self, i, stack, pred_tree):
+    def valid_moves(self, buffer, stack, pred_tree):
         """Returns the valid moves for the specified parser
         configuration.
 
         Args:
-            i: The index of the first unprocessed word.
+            buffer:
             stack: The stack of words (represented by their indices)
                 that are currently being processed.
             pred_tree: The partial dependency tree.
@@ -71,19 +69,21 @@ class Parser():
                 configuration.
         """
         moves = []
-        if i < len(pred_tree):
+        if len(buffer) > 0:
             moves.append(0)
         if len(stack) > 2:
             moves.append(1)
         if len(stack) > 1:
             moves.append(2)
+        if len(stack) > 2 and stack[-1] > stack[-2]:
+            moves.append(3)
         return moves
 
-    def move(self, i, stack, pred_tree, move):
+    def move(self, buffer, stack, pred_tree, move):
         """Executes a single move.
 
         Args:
-            i: The index of the first unprocessed word.
+            buffer: 
             stack: The stack of words (represented by their indices)
                 that are currently being processed.
             pred_tree: The partial dependency tree.
@@ -95,15 +95,68 @@ class Parser():
             stack, and partial dependency tree.
         """
         if move == 0:
-            stack.append(i)
-            i += 1
+            stack.append(buffer.pop(0))
         elif move == 1:
             pred_tree[stack[-2]] = stack[-1]
             del stack[-2]
         elif move == 2:
             pred_tree[stack[-1]] = stack[-2]
             del stack[-1]
-        return i, stack, pred_tree
+        elif move == 3:
+            buffer.insert(0, stack.pop(-2))
+        return buffer, stack, pred_tree
+
+    def is_descendant(self, tree, desc, child):
+        if desc == child:
+            return True
+        if child:
+            return self.is_descendant(tree, desc, tree[child])
+        else:
+            return False
+
+    def get_word_order(self, gold_tree):
+        words = list(range(len(gold_tree)))
+        tree = gold_tree.copy()
+        word_order = [words.pop(0)]
+        del tree[0]
+        while words:
+            node = word_order[-1]
+            # children and their children
+            if node in tree:
+                for i in range(len(words)):
+                    if self.is_descendant(gold_tree, node, words[i]):
+                        word_order.append(words.pop(i))
+                        del tree[i]
+                        break
+            # siblings and their children
+            elif gold_tree[node] in tree:
+                for i in range(len(words)):
+                    if self.is_descendant(gold_tree, gold_tree[node], words[i]):
+                        word_order.append(words.pop(i))
+                        del tree[i]
+                        break
+            # parent
+            elif gold_tree[node] in words:
+                ind = words.index(gold_tree[node])
+                word_order.append(words.pop(ind))
+                del tree[ind]
+            else:
+                while node:
+                    node = gold_tree[node]
+                    # relatives
+                    if node in tree:
+                        for i in range(len(words)):
+                            if self.is_descendant(gold_tree, node, words[i]):
+                                word_order.append(words.pop(i))
+                                del tree[i]
+                                break
+                        break
+                    # ancestors
+                    if node in words:
+                        ind = words.index(node)
+                        word_order.append(words.pop(ind))
+                        del tree[ind]
+        return word_order
 
     def update(self, words, gold_tags, gold_tree):
         """Updates the move classifier with a single training
@@ -119,37 +172,32 @@ class Parser():
             A pair consisting of the predicted tags and the predicted
             dependency tree for the input sentence.
         """
+        word_order = self.get_word_order(gold_tree)
         tags = self.tagger.tag(words)
         pred_tree = [0] * len(words)
         stack = []
-        i = 0
-        while self.valid_moves(i, stack, pred_tree):
-            feat = self.features(words, tags, i, stack, pred_tree)
-            gold_move = self.gold_move(i, stack, pred_tree, gold_tree)
-            move = self.classifier.update(feat,gold_move)
-            i, stack, pred_tree = self.move(i, stack, pred_tree, gold_move)
+        buffer = list(range(len(words)))
+        while self.valid_moves(buffer, stack, pred_tree):
+            feat = self.features(words, tags, buffer, stack, pred_tree)
+            gold_move = self.gold_move(buffer, stack, pred_tree, gold_tree, word_order)
+            self.classifier.update(feat,gold_move)
+            buffer, stack, pred_tree = self.move(buffer, stack, pred_tree, gold_move)
         return tags, pred_tree
 
-    def train(self, data, n_epochs=1, do_projectivize=True, trunc_data=None):
+    def train(self, data, n_epochs=1, trunc_data=None):
         """Trains the parser on training data.
 
         Args:
             data: Training data, a list of sentences with gold trees.
             n_epochs:
-            do_projectivize:
             trunc_data:
         """
         print("Training syntactic parser:")
         for e in range(n_epochs):
             print("Epoch:", e+1, "/", n_epochs)
-            if do_projectivize:
-                train_sentences_tags_trees = zip(   get_sentences(projectivize(data)), \
-                                                    get_tags(projectivize(data)), \
-                                                    get_trees(projectivize(data)) )
-            else:
-                train_sentences_tags_trees = zip(   get_sentences(data), \
-                                                    get_tags(data), \
-                                                    get_trees(data) )
+            train_sentences_tags_trees = zip(   get_sentences(data), \
+                                                get_tags(data), \
+                                                get_trees(data) )
             for i, (words, gold_tags, gold_tree) in enumerate(train_sentences_tags_trees):
                 self.update(words, gold_tags, gold_tree)
                 print("\rUpdated with sentence #{}".format(i), end="")
@@ -158,7 +206,7 @@ class Parser():
             print("")
         self.finalize()
 
-    def gold_move(self, i, stack, pred_tree, gold_tree):
+    def gold_move(self, buffer, stack, pred_tree, gold_tree, word_order):
         """Returns the gold-standard move for the specified parser
         configuration.
 
@@ -173,7 +221,7 @@ class Parser():
         processing.
 
         Args:
-            i: The index of the first unprocessed word.
+            buffer: 
             stack: The stack of words (represented by their indices)
                 that are currently being processed.
             pred_tree: The partial dependency tree.
@@ -197,23 +245,29 @@ class Parser():
                 if gold_tree[j] == stack[-1]:
                     if pred_tree[j] == 0:
                         right_arc_possible = False
+        swap_possible = False
+        if len(stack) > 2 and \
+            word_order.index(stack[-1]) < word_order.index(stack[-2]):
+            swap_possible = True
         if left_arc_possible:
             return 1
         elif right_arc_possible:
             return 2
-        elif i < len(pred_tree):
+        elif swap_possible:
+            return 3
+        elif len(buffer) > 0:
             return 0
         else:
             return None
 
-    def features(self, words, tags, i, stack, parse):
+    def features(self, words, tags, buffer, stack, parse):
         """Extracts features for the specified parser configuration.
 
         Args:
             words: The input sentence, a list of words.
             gold_tags: The list of gold-standard tags for the input
                 sentence.
-            i: The index of the first unprocessed word.
+            buffer: 
             stack: The stack of words (represented by their indices)
                 that are currently being processed.
             parse: The partial dependency tree.
@@ -224,8 +278,8 @@ class Parser():
         feat = []
 
         # Single word features
-        b1_w = words[i] if len(words) > i else "<empty>"
-        b1_t = tags[i] if len(words) > i else "<empty>"
+        b1_w = words[buffer[0]] if buffer else "<empty>"
+        b1_t = tags[buffer[0]] if buffer else "<empty>"
         b1_wt = b1_w + " " + b1_t
 
         s1_w = words[stack[-1]] if stack else "<empty>"
@@ -247,9 +301,6 @@ class Parser():
         s1_t_s2_t = s1_t + " " + s2_t
         s1_t_b1_t = s1_t + " " + b1_t
 
-
-
-
         feat.append("b1_w:" + b1_w)
         feat.append("b1_t:" + b1_t)
         feat.append("b1_wt:" + b1_wt)
@@ -270,9 +321,6 @@ class Parser():
         feat.append("s1_w_s2_w:" + s1_w_s2_w)
         feat.append("s1_t_s2_t:" + s1_t_s2_t)
         feat.append("s1_t_b1_t:" + s1_t_b1_t)
-
-
-
 
         return feat
 

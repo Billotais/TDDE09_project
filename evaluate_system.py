@@ -10,7 +10,7 @@ train_data = load_data(sys.argv[1])
 tagger = Tagger()
 tagger.train(train_data, n_epochs=3, trunc_data=None)
 parser = Parser(tagger)
-parser.train(train_data, n_epochs=3, do_projectivize=True, trunc_data=None)
+parser.train(train_data, n_epochs=3, trunc_data=None)
 
 print("Evaluation:")
 dev_data = load_data(sys.argv[2])
