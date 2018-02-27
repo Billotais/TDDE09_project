@@ -74,7 +74,6 @@ class Parser():
             while len(possible_trees) > beam_size:
                 del possible_trees[min(enumerate(possible_trees), \
                     key = lambda t: t[1][0])[0]]
-        print("\n",max(possible_trees, key = lambda t: t[0])[0])
         return tags, max(possible_trees, key = lambda t: t[0])[1]
 
     def valid_moves(self, buffer, stack, pred_tree):
