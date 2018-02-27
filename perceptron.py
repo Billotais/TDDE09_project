@@ -29,7 +29,7 @@ class Perceptron():
             if score >= best_score:
                 best_score = score
                 best_class = curr_class
-        return best_class
+        return best_class, scores
         
 
     def update(self, x, y):
@@ -42,7 +42,7 @@ class Perceptron():
         Returns:
             The predicted class, represented as a string.
         """
-        p = self.predict(x)          
+        p, _ = self.predict(x)          
         if not p == y:
             if y not in self.weights:
                 self.weights[y] = {}

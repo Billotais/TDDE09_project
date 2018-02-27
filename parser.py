@@ -33,7 +33,7 @@ class Parser():
         self.tagger = tagger
         self.classifier = Perceptron()
 
-    def parse(self, words):
+    def parse(self, words, beam_thresh=10, beam_size=1):
         """Parses a sentence.
 
         Args:
@@ -44,15 +44,38 @@ class Parser():
             dependency tree for the input sentence.
         """
         tags = self.tagger.tag(words)
+        score = 0
         pred_tree = [0] * len(words)
         stack = []
         buffer = list(range(len(words)))
-        while self.valid_moves(buffer, stack, pred_tree):
-            feat = self.features(words, tags, buffer, stack, pred_tree)
-            candidates = self.valid_moves(buffer, stack, pred_tree)
-            move = self.classifier.predict(feat, candidates)
-            buffer, stack, pred_tree = self.move(buffer, stack, pred_tree, move)
-        return tags, pred_tree
+        next_move = 0
+        possible_trees = [( score, pred_tree, stack, buffer, next_move )]                    
+        while any(tree[4] != None for tree in possible_trees):
+            flag = 0
+            for i, (score, pred_tree, stack, buffer, next_move) \
+                    in enumerate(possible_trees):
+                buffer, stack, pred_tree = self.move(buffer, \
+                    stack, pred_tree, next_move)
+                feat = self.features(words, tags, buffer, stack, pred_tree)
+                candidates = self.valid_moves(buffer, stack, pred_tree)
+                if candidates:
+                    next_move, scores = self.classifier.predict(feat, candidates)
+                    for curr_move, curr_score in scores.items():
+                        if curr_move != next_move and curr_score > beam_thresh:
+                            flag += 1 
+                            possible_trees.append((score+curr_score, \
+                            pred_tree.copy(), stack.copy(), buffer.copy(), curr_move))
+                    score += scores[next_move]
+                else:
+                    next_move = None
+                possible_trees[i] = (score, pred_tree, stack, buffer, next_move)
+                if i+1+flag == len(possible_trees):
+                    break
+            while len(possible_trees) > beam_size:
+                del possible_trees[min(enumerate(possible_trees), \
+                    key = lambda t: t[1][0])[0]]
+        print("\n",max(possible_trees, key = lambda t: t[0])[0])
+        return tags, max(possible_trees, key = lambda t: t[0])[1]
 
     def valid_moves(self, buffer, stack, pred_tree):
         """Returns the valid moves for the specified parser
