@@ -302,6 +302,7 @@ class Parser():
         s1_t_b1_t = s1_t + " " + b1_t
 
          # Triple word features
+
         def is_parent(parent, child):
             if child == 0:
                 return False
@@ -309,11 +310,14 @@ class Parser():
                 return True
             return is_parent(parent, parse[child])
 
+        # Child that is the most on the left
         def lc1(parent):
             for i in range(0, len(words)):
                 if is_parent(parent, i):
                     return i
             return -1
+            
+        # Child that is the most on the right
         def rc1(parent):
             for i in range(0, len(words), -1):
                 if is_parent(parent, i):
