@@ -222,24 +222,58 @@ class Parser():
             A feature vector for the specified configuration.
         """
         feat = []
-        if len(words) > i:
-            feat.append((0, words[i]))
-            feat.append((1, tags[i]))
-        else:
-            feat.append((0, '<EMPTY>'))
-            feat.append((1, '<EMPTY>'))
-        if stack:
-            feat.append((2, words[stack[-1]]))
-            feat.append((3, tags[stack[-1]]))
-        else:
-            feat.append((2, '<EMPTY>'))
-            feat.append((3, '<EMPTY>'))
-        if len(stack) > 1:
-            feat.append((4, words[stack[-2]]))
-            feat.append((5, tags[stack[-2]]))
-        else:
-            feat.append((4, '<EMPTY>'))
-            feat.append((5, '<EMPTY>'))
+
+        # Single word features
+        b1_w = words[i] if len(words) > i else "<empty>"
+        b1_t = tags[i] if len(words) > i else "<empty>"
+        b1_wt = b1_w + " " + b1_t
+
+        s1_w = words[stack[-1]] if stack else "<empty>"
+        s1_t = tags[stack[-1]] if stack else "<empty>"
+        s1_wt = s1_w + " " + s1_t
+
+        s2_w = words[stack[-2]] if len(stack) > 1 else "<empty>"
+        s2_t = tags[stack[-2]] if len(stack) > 1 else "<empty>"
+        s2_wt = s2_w + " " + s2_t
+
+        # Double words features
+
+        s1_wt_s2_wt = s1_wt + " " + s2_wt
+        s1_wt_s2_w = s1_wt + " " + s2_w
+        s1_wt_s2_t = s1_wt + " " + s2_t
+        s1_w_s2_wt = s1_w + " " + s2_wt
+        s1_t_s2_wt = s1_t + " " + s2_wt
+        s1_w_s2_w = s1_w + " " + s2_w
+        s1_t_s2_t = s1_t + " " + s2_t
+        s1_t_b1_t = s1_t + " " + b1_t
+
+
+
+
+        feat.append("b1_w:" + b1_w)
+        feat.append("b1_t:" + b1_t)
+        feat.append("b1_wt:" + b1_wt)
+
+        feat.append("s1_w:" + s1_w)
+        feat.append("s1_t:" + s1_t)
+        feat.append("s1_wt:" + s1_wt)
+
+        feat.append("s2_w:" + s2_w)
+        feat.append("s2_t:" + s2_t)
+        feat.append("s2_wt:" + s2_wt)
+
+        feat.append("s1_wt_s2_wt:" + s1_wt_s2_wt)
+        feat.append("s1_wt_s2_w:" + s1_wt_s2_w)
+        feat.append("s1_wt_s2_t:" + s1_wt_s2_t)
+        feat.append("s1_w_s2_wt:" + s1_w_s2_wt)
+        feat.append("s1_t_s2_wt:" + s1_t_s2_wt)
+        feat.append("s1_w_s2_w:" + s1_w_s2_w)
+        feat.append("s1_t_s2_t:" + s1_t_s2_t)
+        feat.append("s1_t_b1_t:" + s1_t_b1_t)
+
+
+
+
         return feat
 
     def finalize(self):
