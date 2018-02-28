@@ -1,5 +1,6 @@
 from perceptron import Perceptron
-from nlp_tools import get_sentences, get_tags, get_trees
+from nlp_tools import softmax, get_sentences, get_tags, get_trees
+from math import log
 
 class Parser():
     """A transition-based dependency parser.
@@ -60,20 +61,26 @@ class Parser():
                 candidates = self.valid_moves(buffer, stack, pred_tree)
                 if candidates:
                     next_move, scores = self.classifier.predict(feat, candidates)
+                    # apply softmax on the scores 
+                    scores_lst = [(k, v) for k, v in scores.items()]
+                    softmax_scores = softmax(list(zip(*scores_lst))[1])
+                    scores = dict(list(zip( list(zip(*scores_lst))[0], softmax_scores )))
                     for curr_move, curr_score in scores.items():
                         if curr_move != next_move and curr_score > beam_thresh:
                             flag += 1 
                             possible_trees.append((score+curr_score, \
                             pred_tree.copy(), stack.copy(), buffer.copy(), curr_move))
-                    score += scores[next_move]
+                    score += log(scores[next_move])
                 else:
                     next_move = None
                 possible_trees[i] = (score, pred_tree, stack, buffer, next_move)
                 if i+1+flag == len(possible_trees):
                     break
+            # delete the configs with the lowest scores
             while len(possible_trees) > beam_size:
                 del possible_trees[min(enumerate(possible_trees), \
                     key = lambda t: t[1][0])[0]]
+        # return best tree
         return tags, max(possible_trees, key = lambda t: t[0])[1]
 
     def valid_moves(self, buffer, stack, pred_tree):
