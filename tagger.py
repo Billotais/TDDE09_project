@@ -77,7 +77,8 @@ class Tagger():
         pred_tags = []
         for i in range(len(words)):
             feat = self.features(words, i, pred_tags)
-            pred_tags.append(self.classifier.predict(feat))
+            tag, _ = self.classifier.predict(feat)
+            pred_tags.append(tag)
         return pred_tags
 
     def update(self, words, gold_tags):
