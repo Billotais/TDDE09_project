@@ -36,9 +36,9 @@ EWT/en-ud-dev.conllu ./train_config.json`
 
 ## Run
 In order to run the advanced system, simply run <br>
-`$ python3 evaluate_system.py ../UD_English-EWT/en-ud-train.conllu ../UD_English-EWT/en-ud-dev.conllu` 
+`$ python3 evaluate_system.py --train ../UD_English-EWT/en-ud-train.conllu ../UD_English-EWT/en-ud-dev.conllu` 
 <br>for the English dataset and<br>
-`$ python3 evaluate_system.py ../UD_Swedish-Talbanken/sv-ud-train.conllu ../UD_Swedish-Talbanken/sv-ud-dev.conllu`
+`$ python3 evaluate_system.py --train ../UD_Swedish-Talbanken/sv-ud-train.conllu ../UD_Swedish-Talbanken/sv-ud-dev.conllu`
 <br>for the Swedish dataset. The function loads the training data, trains the tagger, 
 trains the parser based on the trained tagger and finally evaluates the system on the test dataset. In the following the results for the English and the Swedish treebank can be found:<br>
 English Treebank:

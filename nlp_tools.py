@@ -1,3 +1,5 @@
+import math
+
 def load_data(filename):
     data = [[]]
     with open(filename, encoding='utf-8') as source:
@@ -9,6 +11,11 @@ def load_data(filename):
     if not data[-1]:
         data = data[:-1]
     return data
+
+def softmax(z):
+    z_exp = [math.exp(i) for i in z]
+    sum_z_exp = sum(z_exp)
+    return [round(i / sum_z_exp, 3) for i in z_exp]
 
 def accuracy(preds, golds, correction=0):
     count = -correction
