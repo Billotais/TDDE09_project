@@ -13,7 +13,7 @@ def load_data(filename):
     return data
 
 def softmax(z):
-    z_exp = [math.exp(i) for i in z]
+    z_exp = [1.1**i for i in z]
     sum_z_exp = sum(z_exp)
     return [round(i / sum_z_exp, 3) for i in z_exp]
 
