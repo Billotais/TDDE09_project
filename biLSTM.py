@@ -82,16 +82,14 @@ class BiLSTM(GenericModel):
                 feed_dict = self.get_feed_dict(words, seq_len_batch, labels)
                 _, train_loss, summary = self.sess.run([self.training_op, self.loss, self.merged], feed_dict=feed_dict)
 
-            logging.info("Training for epoch {} finished".format(epoch + 1))
+
             accuracy = self.evaluate(dev_x, dev_y, sequence_len)
-            msg = "Epoch {} - Accuracy: {:04.2f}".format(epoch, accuracy)
-            logging.info(msg)
 
             if accuracy >= best_acc:
                 no_improvement = 0
                 self.save_sess()
                 best_acc = accuracy
-                logging.info("New best score!")
+                logging.info("New best score: {:04.2f}".format(accuracy))
             else:
                 no_improvement += 1
                 if no_improvement >= self.config['n_epoch_no_imp']:
@@ -124,7 +122,6 @@ class BiLSTM(GenericModel):
                 label_gold = label_gold[:int(length)]
                 accs += [pred==gold for (pred,gold) in zip(label_pred, label_gold)]
         acc = np.mean(accs)*100
-        print(acc)
         return acc
 
     def predict(self, sentence, sequence_len):
