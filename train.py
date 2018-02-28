@@ -5,7 +5,7 @@ import json
 import sys
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
-from nlp_tools import *
+from data_utils import *
 from biLSTM import BiLSTM
 
 
