@@ -27,6 +27,12 @@ with Python 3.6.
 
 `$ cd baseline-system`
 
+##NN
+Prepare data <br>
+'python3 prepare_data.py ../UD_English-EWT/en-ud-train.conllu ../UD_English-
+EWT/en-ud-dev.conllu ./train_config.json'
+<br>Train <br>
+'python3 train.py ./train_config.json'
 
 ## Run
 In order to run the advanced system, simply run <br>
