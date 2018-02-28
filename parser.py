@@ -68,7 +68,7 @@ class Parser():
                     for curr_move, curr_score in scores.items():
                         if curr_move != next_move and curr_score > beam_thresh:
                             flag += 1 
-                            possible_trees.append((score+curr_score, \
+                            possible_trees.append((score+log(curr_score), \
                             pred_tree.copy(), stack.copy(), buffer.copy(), curr_move))
                     score += log(scores[next_move])
                 else:
