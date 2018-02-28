@@ -81,3 +81,23 @@ Swedish Treebank:
     Tagging accuracy: 93.69%
     Unlabelled attachment score: 59.65%
 
+# Abstract
+
+Feature engineering on the parser : 
+
+- EN : 65.29% to 69.33%
+- SV : 59.65% to 64.32%
+
+Use of a non-projectivize parser :
+
+- EN : 69.33% to 69.10%
+- SV : 64.32% to 64.93%
+
+Further improvement of the features : 
+
+- EN : 69.10% to 69.38%
+- SV : 64.93% to 65.14%
+
+Replaced the greedy search by a beam search : 
+
+- No improvement in accuracy
