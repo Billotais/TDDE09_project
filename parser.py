@@ -398,7 +398,14 @@ class Parser():
         feat.append("s2_t_s1_t_rc1_s2_t:" + s2_t_s1_t_rc1_s2_t)
         feat.append("s2_t_s1_w_rc1_s2_t:" + s2_t_s1_w_rc1_s2_t)
         feat.append("s2_t_s1_w_lc1_s1_t:" + s2_t_s1_w_lc1_s1_t)
-        feat.append("s2_t_s1_w_b1_t:" + s2_t_s1_w_b1_t) 
+        #feat.append("s2_t_s1_w_b1_t:" + s2_t_s1_w_b1_t) 
+
+        '''
+        feat.append("a:"+tags[lc1_s1])
+        feat.append("b:"+tags[rc1_s1])
+        feat.append("c:"+tags[rc1_s2])
+        feat.append("d:"+tags[rc1_s2])
+        '''
 
         return feat
 

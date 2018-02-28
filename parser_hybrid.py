@@ -200,10 +200,13 @@ class Parser():
         stack = []
         buffer = list(range(len(words)))
         while self.valid_moves(buffer, stack, pred_tree):
+          
             feat = self.features(words, tags, buffer, stack, pred_tree)
             gold_move = self.gold_move(buffer, stack, pred_tree, gold_tree, word_order)
+            
             self.classifier.update(feat,gold_move)
             buffer, stack, pred_tree = self.move(buffer, stack, pred_tree, gold_move)
+        
         return tags, pred_tree
 
     def train(self, data, n_epochs=1, trunc_data=None):
@@ -257,7 +260,7 @@ class Parser():
         if len(stack) > 0 and buffer and buffer[0] == gold_tree[stack[-1]]:
             left_arc_possible = True
             for j in range(len(pred_tree)):
-                if gold_tree[j] == buffer[0]:
+                if gold_tree[j] == stack[-1]:
                     if pred_tree[j] == 0:
                         left_arc_possible = False
         right_arc_possible = False
