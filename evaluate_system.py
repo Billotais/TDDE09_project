@@ -12,6 +12,12 @@ argparser.add_argument('-l', '--load', metavar='file', type=str,
                     help='load existing config from file')
 argparser.add_argument('-s', '--save', metavar='file', type=str, 
                     help='save config to file')
+argparser.add_argument('--trunc_data', metavar='n', type=int, default=0,
+                    help='use only the first n samples for training')
+argparser.add_argument('--n_epochs',  metavar='n', type=int, default=3,
+                    help='set the number of training epochs' )
+argparser.add_argument('--beam_size',  metavar='n', type=int, default=1,
+                    help='set the size of the beam during evaluation' )
 args = argparser.parse_args()
 
 if not args.train and not args.load:
@@ -20,9 +26,9 @@ if not args.train and not args.load:
 if args.train:
     train_data = load_data(args.train)
     tagger = Tagger()
-    tagger.train(train_data, n_epochs=3, trunc_data=None)
+    tagger.train(train_data, n_epochs=args.n_epochs, trunc_data=args.trunc_data)
     parser = Parser(tagger)
-    parser.train(train_data, n_epochs=3, trunc_data=None)
+    parser.train(train_data, n_epochs=args.n_epochs, trunc_data=args.trunc_data)
 
 if args.train and args.save:
     with open(args.save, 'wb') as output:
@@ -42,7 +48,7 @@ pred_trees = []
 correction = 0
 for i, sentence in enumerate(get_sentences(dev_data)):
     print("\rEvaluated with sentence #{}".format(i), end="")
-    pred_tags, pred_tree = parser.parse(sentence, beam_thresh=0, beam_size=1)
+    pred_tags, pred_tree = parser.parse(sentence, beam_thresh=0, beam_size=args.beam_size)
     pred_tags_lst += pred_tags
     pred_trees_lst += pred_tree
     pred_trees.append(pred_tree)
