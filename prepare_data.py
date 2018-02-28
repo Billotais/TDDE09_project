@@ -9,53 +9,26 @@ from nlp_tools import *
 from data_utils import *
 logging.getLogger().setLevel(logging.INFO)
 
-if len(sys.argv) != 4:
+if len(sys.argv) != 5:
     exit("Usage:\n python prepare_data.py [path to training data] [path to evaluation data] [path to training config file]")
 
 #data
 train_data = load_data(sys.argv[1])
 dev_data = load_data(sys.argv[2])
-params = json.loads(open(sys.argv[3]).read())
+test_data = load_data(sys.argv[3])
+config = json.loads(open(sys.argv[4]).read())
 
 #Preprocess
-x_embeddings, x, y_onehot, tags, voc, voc_inv, tag_dict_inv, sent_lens = process_data(train_data, params)
+#Training
+x_embeddings, x, x_dev, y, tags, tags_dev, voc, voc_inv, tag_dict_inv, sent_lens, sent_lens_dev = process_data(config, train_data, dev_data)
+
+#Test
+x_embeddings_test, x_test, y_test, tags_test, voc_test, voc_inv_test, tag_dict_inv_test, sent_lens_test = process_data(config, test_data)
 
 
-# Create a directory, everything related to the training will be saved in this directory
-trained_dir = params['processed_data_location']
-if os.path.exists(trained_dir):
-    shutil.rmtree(trained_dir)
-os.makedirs(trained_dir)
+# Save data files
+save_data_to_dir(make_dir(config['processed_data_location']), x_embeddings, x, y, tags, voc, voc_inv, tag_dict_inv, sent_lens)
+save_data_to_dir(make_dir(config['processed_dev_data_location']), x=x_dev, tags=tags_dev, sent_lens=sent_lens_dev)
+save_data_to_dir(make_dir(config['processed_test_data_location']), x_embeddings_test, x_test, y_test, tags_test, voc_test, voc_inv_test, tag_dict_inv_test, sent_lens_test)
 
-# Save trained parameters and files since predict.py needs them
-with open(trained_dir + 'sent_lens.pickle', 'wb') as outfile:
-    pickle.dump(sent_lens, outfile, pickle.HIGHEST_PROTOCOL)
-    logging.info('Vector with sent_lens saved')
 
-with open(trained_dir + 'x_embeddings.pickle', 'wb') as outfile:
-    pickle.dump(x_embeddings, outfile, pickle.HIGHEST_PROTOCOL)
-    logging.info('Embedding matrix X saved')
-
-with open(trained_dir + 'x.pickle', 'wb') as outfile:
-    pickle.dump(x, outfile, pickle.HIGHEST_PROTOCOL)
-    logging.info('Data matrix X saved')
-
-with open(trained_dir + 'y_onehot.pickle', 'wb') as outfile:
-    pickle.dump(y_onehot, outfile, pickle.HIGHEST_PROTOCOL)
-    logging.info('One hot matrix y saved')
-
-with open(trained_dir + 'tags.pickle', 'wb') as outfile:
-    pickle.dump(tags, outfile, pickle.HIGHEST_PROTOCOL)
-    logging.info('Data matrix y saved')
-
-with open(trained_dir + 'voc.json', 'w') as outfile:
-    json.dump(voc, outfile, indent=4, ensure_ascii=False)
-    logging.info('Voc dict saved')
-
-with open(trained_dir + 'voc_inv.json', 'w') as outfile:
-    json.dump(voc_inv, outfile, indent=4, ensure_ascii=False)
-    logging.info('Voc_inv dict saved')
-
-with open(trained_dir + 'tag_dict_inv.json', 'w') as outfile:
-    json.dump(tag_dict_inv, outfile, indent=4, ensure_ascii=False)
-    logging.info('Tag dict saved')

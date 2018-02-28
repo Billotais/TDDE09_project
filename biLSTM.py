@@ -70,7 +70,7 @@ class BiLSTM(GenericModel):
         #Initialize variables
         self.init_sess()
 
-    def train(self, train_x, train_y, dev_x, dev_y, sequence_len):
+    def train(self, train_x, train_y, dev_x, dev_y, sequence_len, sequence_len_dev):
         """Training with early stopping"""
         best_acc = 0
         no_improvement = 0 # number of epochs without improvement for early stopping
@@ -83,13 +83,13 @@ class BiLSTM(GenericModel):
                 _, train_loss, summary = self.sess.run([self.training_op, self.loss, self.merged], feed_dict=feed_dict)
 
 
-            accuracy = self.evaluate(dev_x, dev_y, sequence_len)
+            accuracy = self.evaluate(dev_x, dev_y, sequence_len_dev)
 
             if accuracy >= best_acc:
                 no_improvement = 0
                 self.save_sess()
                 best_acc = accuracy
-                logging.info("New best score: {:04.2f}".format(accuracy))
+                logging.info("New best score: {:04.2f}%".format(accuracy))
             else:
                 no_improvement += 1
                 if no_improvement >= self.config['n_epoch_no_imp']:
