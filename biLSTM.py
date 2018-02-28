@@ -49,7 +49,7 @@ class BiLSTM(GenericModel):
 
         with tf.variable_scope("loss"):
             xentropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.logits, labels=self.labels)
-            mask = tf.sequence_mask(sent_len)
+            mask = tf.sequence_mask(self.seq_len)
             xentropy = tf.boolean_mask(xentropy, mask)
             self.loss = tf.reduce_mean(xentropy, name="loss")
             tf.summary.scalar("loss", self.loss)
@@ -79,12 +79,10 @@ class BiLSTM(GenericModel):
         for epoch in range(self.config['n_epochs']):
             logging.info("Epoch {:} out of {:}".format(epoch + 1, self.config['n_epochs']))
             for i, (words, labels, seq_len_batch) in enumerate(self.iterate_minibatches(train_x, train_y, sequence_len, self.config['batch_size'])):
-                logging.info("Batch {}".format(i+1))
                 feed_dict = self.get_feed_dict(words, seq_len_batch, labels)
-                logging.info("Feeddict created")
                 _, train_loss, summary = self.sess.run([self.training_op, self.loss, self.merged], feed_dict=feed_dict)
-                logging.info("Sess is run!")
 
+            logging.info("Training for epoch {} finished".format(epoch + 1))
             accuracy = self.evaluate(dev_x, dev_y, sequence_len)
             msg = "Epoch {} - Accuracy: {:04.2f}".format(epoch, accuracy)
             logging.info(msg)
@@ -113,7 +111,7 @@ class BiLSTM(GenericModel):
 
     def predict_batch(self, sents, sequence_len):
         feed_dict = self.get_feed_dict(sents, sequence_len)
-        labels_pred, _ = self.sess.run(self.labels_pred, feed_dict=feed_dict)
+        labels_pred = self.sess.run(self.labels_pred, feed_dict=feed_dict)
         return labels_pred
 
     def evaluate(self, test_sent, test_label, sequence_len):
@@ -122,6 +120,7 @@ class BiLSTM(GenericModel):
         for sents, labels, seq_len_batch in self.iterate_minibatches(test_sent, test_label, sequence_len, self.config['batch_size']):
             pred = self.predict_batch(sents, seq_len_batch)
             for label_pred, label_gold, length in zip(pred, labels, seq_len_batch):
+                print(length)
                 label_pred = label_pred[:length]
                 label_gold = label_gold[:length]
                 accs += [pred==gold for (pred,gold) in zip(label_pred, label_gold)]
