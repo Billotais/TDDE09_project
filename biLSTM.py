@@ -120,11 +120,12 @@ class BiLSTM(GenericModel):
         for sents, labels, seq_len_batch in self.iterate_minibatches(test_sent, test_label, sequence_len, self.config['batch_size']):
             pred = self.predict_batch(sents, seq_len_batch)
             for label_pred, label_gold, length in zip(pred, labels, seq_len_batch):
-                print(length)
-                label_pred = label_pred[:length]
-                label_gold = label_gold[:length]
+                label_pred = label_pred[:int(length)]
+                label_gold = label_gold[:int(length)]
                 accs += [pred==gold for (pred,gold) in zip(label_pred, label_gold)]
-        return np.mean(accs)*100
+        acc = np.mean(accs)*100
+        print(acc)
+        return acc
 
     def predict(self, sentence, sequence_len):
         '''Returns list of tags'''
