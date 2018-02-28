@@ -89,7 +89,7 @@ class BiLSTM(GenericModel):
 
             if accuracy >= best_acc:
                 no_improvement = 0
-                self.save_session()
+                self.save_sess()
                 best_acc = accuracy
                 logging.info("New best score!")
             else:
