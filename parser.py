@@ -367,7 +367,6 @@ class Parser():
         s2_t_s1_t_rc1_s2_t = s2_t + " " + s1_t + " " + tags[rc1_s2] if rc1_s2 >= 0 else "<empty>"
         s2_t_s1_w_rc1_s2_t = s2_t + " " + s1_w + " " + tags[rc1_s2] if lc1_s2 >= 0 else "<empty>"
         s2_t_s1_w_lc1_s1_t = s2_t + " " + s1_w + " " + tags[lc1_s1] if lc1_s1 >= 0 else "<empty>"
-        s2_t_s1_w_b1_t = s2_t + " " + s1_w + " " +  b1_t
 
         feat.append("b1_w:" + b1_w)
         feat.append("b1_t:" + b1_t)

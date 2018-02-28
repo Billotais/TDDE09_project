@@ -7,7 +7,7 @@ documentation.
 In order be able to use our advanced system it is necessary to
 retrieve data from the Universal Dependencies treebanks. 
 Therefore, clone the treebanks you are interested in.
-Our example includes the English and the Swedish dataset. 
+Our example includes the English, the Swedish and the French dataset. 
 Further languages can be found online in the UniversalDependencies repository.
 If you want to get a feeling for how the system works feel free to see the 
 section “Run” below.
@@ -21,6 +21,8 @@ with Python 3.6.
 `$ git clone https://github.com/UniversalDependencies/UD_Swedish-Talbanken.git`
 
 `$ git clone https://github.com/UniversalDependencies/UD_English-EWT.git`
+
+`$ git clone https://github.com/UniversalDependencies/UD_French-GSD.git`
 
 ### Clone the baseline system:
 `$ git clone git@gitlab.ida.liu.se:nlp2018-group3/baseline-system.git`
@@ -37,9 +39,11 @@ EWT/en-ud-dev.conllu ./train_config.json`
 ## Run
 In order to run the advanced system, simply run <br>
 `$ python3 evaluate_system.py --train ../UD_English-EWT/en-ud-train.conllu ../UD_English-EWT/en-ud-dev.conllu` 
-<br>for the English dataset and<br>
+<br>for the English dataset,<br>
 `$ python3 evaluate_system.py --train ../UD_Swedish-Talbanken/sv-ud-train.conllu ../UD_Swedish-Talbanken/sv-ud-dev.conllu`
-<br>for the Swedish dataset. The function loads the training data, trains the tagger, 
+<br>for the Swedish dataset and
+`$ python3 evaluate_system.py --train ../UD_French-GSD/fr-ud-train.conllu ../UD_French-GSD/fr-ud-dev.conllu`
+<br>for the French dataset. The function loads the training data, trains the tagger, 
 trains the parser based on the trained tagger and finally evaluates the system on the test dataset. In the following the results for the English and the Swedish treebank can be found:<br>
 English Treebank:
 
@@ -81,6 +85,28 @@ Swedish Treebank:
     Tagging accuracy: 93.69%
     Unlabelled attachment score: 59.65%
 
+French Treebank:
+
+    Training POS tagger
+    Epoch: 1 / 3
+    Updated with sentence #14553
+    Epoch: 2 / 3
+    Updated with sentence #14553
+    Epoch: 3 / 3
+    Updated with sentence #14553
+    Training syntactic parser:
+    Epoch: 1 / 3
+    Updated with sentence #14553
+    Epoch: 2 / 3
+    Updated with sentence #14553
+    Epoch: 3 / 3
+    Updated with sentence #14553
+    Evaluation:
+    Tagging accuracy: 96.57%
+    Unlabelled attachment score: 81.33%
+
+
+
 # Abstract
 
 Feature engineering on the parser : 
@@ -111,3 +137,7 @@ Few tweaks in features
 
 - EN : 76.70% to 76.24%
 - SV : 71.79% to 72.45%
+
+Added French treebank for more tests
+
+- FR : 81.33% accuracy
