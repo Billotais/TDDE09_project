@@ -65,15 +65,18 @@ class Parser():
                     scores_lst = [(k, v) for k, v in scores.items()]
                     softmax_scores = softmax(list(zip(*scores_lst))[1])
                     scores = dict(list(zip( list(zip(*scores_lst))[0], softmax_scores )))
+                    # add new configs for the other possible moves
                     for curr_move, curr_score in scores.items():
                         if curr_move != next_move and curr_score > beam_thresh:
                             flag += 1 
+                            # create a copy of the config and append it to the list
                             possible_trees.append((score+log(curr_score), \
                             pred_tree.copy(), stack.copy(), buffer.copy(), curr_move))
                     score += log(scores[next_move])
                 else:
                     next_move = None
                 possible_trees[i] = (score, pred_tree, stack, buffer, next_move)
+                # do not run the for loop for the just added configs
                 if i+1+flag == len(possible_trees):
                     break
             # delete the configs with the lowest scores
