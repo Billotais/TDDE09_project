@@ -143,11 +143,18 @@ def process_data(config, data, dev_data=None):
     else:
         return x_emb, x, y, tags, voc, voc_inv, tag_dict_inv, sent_lens
 
+<<<<<<< HEAD
 def load_processed_data(trained_dir, dev=False):
     if dev is False:
         voc = json.loads(open(trained_dir + 'voc.json').read())
         voc_inv = json.loads(open(trained_dir + 'voc_inv.json').read())
         tag_dict_inv = json.loads(open(trained_dir + 'tag_dict_inv.json').read())
+=======
+def load_processed_data(trained_dir):
+    voc = json.loads(open(trained_dir + 'voc.json',encoding='utf-8').read())
+    voc_inv = json.loads(open(trained_dir + 'voc_inv.json',encoding='utf-8').read())
+    tag_dict_inv = json.loads(open(trained_dir + 'tag_dict_inv.json',encoding='utf-8').read())
+>>>>>>> 22392a6899343411480148657102e6d656ae4097
 
         with open(trained_dir + 'y.pickle', 'rb') as input_file:
             fetched_y = pickle.load(input_file)

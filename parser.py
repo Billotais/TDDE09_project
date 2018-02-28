@@ -1,5 +1,6 @@
 from perceptron import Perceptron
-from nlp_tools import get_sentences, get_tags, get_trees
+from nlp_tools import softmax, get_sentences, get_tags, get_trees
+from math import log
 
 class Parser():
     """A transition-based dependency parser.
@@ -60,20 +61,29 @@ class Parser():
                 candidates = self.valid_moves(buffer, stack, pred_tree)
                 if candidates:
                     next_move, scores = self.classifier.predict(feat, candidates)
+                    # apply softmax on the scores 
+                    scores_lst = [(k, v) for k, v in scores.items()]
+                    softmax_scores = softmax(list(zip(*scores_lst))[1])
+                    scores = dict(list(zip( list(zip(*scores_lst))[0], softmax_scores )))
+                    # add new configs for the other possible moves
                     for curr_move, curr_score in scores.items():
                         if curr_move != next_move and curr_score > beam_thresh:
                             flag += 1 
-                            possible_trees.append((score+curr_score, \
+                            # create a copy of the config and append it to the list
+                            possible_trees.append((score+log(curr_score), \
                             pred_tree.copy(), stack.copy(), buffer.copy(), curr_move))
-                    score += scores[next_move]
+                    score += log(scores[next_move])
                 else:
                     next_move = None
                 possible_trees[i] = (score, pred_tree, stack, buffer, next_move)
+                # do not run the for loop for the just added configs
                 if i+1+flag == len(possible_trees):
                     break
+            # delete the configs with the lowest scores
             while len(possible_trees) > beam_size:
                 del possible_trees[min(enumerate(possible_trees), \
                     key = lambda t: t[1][0])[0]]
+        # return best tree
         return tags, max(possible_trees, key = lambda t: t[0])[1]
 
     def valid_moves(self, buffer, stack, pred_tree):
@@ -304,6 +314,14 @@ class Parser():
         b1_t = tags[buffer[0]] if buffer else "<empty>"
         b1_wt = b1_w + " " + b1_t
 
+        b2_w = words[buffer[1]] if len(buffer) > 1 else "<empty>"
+        b2_t = tags[buffer[1]] if len(buffer) > 1 else "<empty>"
+        b2_wt = b2_w + " " + b2_t
+
+        b3_w = words[buffer[2]] if len(buffer) > 2 else "<empty>"
+        b3_t = tags[buffer[2]] if len(buffer) > 2 else "<empty>"
+        b3_wt = b3_w + " " + b3_t
+
         s1_w = words[stack[-1]] if stack else "<empty>"
         s1_t = tags[stack[-1]] if stack else "<empty>"
         s1_wt = s1_w + " " + s1_t
@@ -312,16 +330,10 @@ class Parser():
         s2_t = tags[stack[-2]] if len(stack) > 1 else "<empty>"
         s2_wt = s2_w + " " + s2_t
 
-        # Double words features
 
-        s1_wt_s2_wt = s1_wt + " " + s2_wt
-        s1_wt_s2_w = s1_wt + " " + s2_w
-        s1_wt_s2_t = s1_wt + " " + s2_t
-        s1_w_s2_wt = s1_w + " " + s2_wt
-        s1_t_s2_wt = s1_t + " " + s2_wt
-        s1_w_s2_w = s1_w + " " + s2_w
-        s1_t_s2_t = s1_t + " " + s2_t
-        s1_t_b1_t = s1_t + " " + b1_t
+        #for i in parse:
+         #   if stack and parse[stack[-1]] == i:
+          #      feat.append("tag" + str(i) + str(tags[i])) 
 
          # Triple word features
 
@@ -346,10 +358,10 @@ class Parser():
                     return i
             return -1
 
-        lc1_s1 = lc1(words[stack[-1]]) if stack else -1
-        rc1_s1 = rc1(words[stack[-1]]) if stack else -1
-        lc1_s2 = lc1(words[stack[-2]]) if len(stack) > 1 else -1
-        rc1_s2 = rc1(words[stack[-2]]) if len(stack) > 1 else -1
+        lc1_s1 = lc1(stack[-1]) if stack else -1
+        rc1_s1 = rc1(stack[-1]) if stack else -1
+        lc1_s2 = lc1(stack[-2]) if len(stack) > 1 else -1
+        rc1_s2 = rc1(stack[-2]) if len(stack) > 1 else -1
 
         s2_t_s1_t_b1_t = s2_t + " " + s1_t + " " + b1_t
         s2_t_s1_t_lc1_s1_t = s2_t + " " + s1_t + " " + tags[lc1_s1] if lc1_s1 >= 0 else "<empty>"
@@ -358,11 +370,18 @@ class Parser():
         s2_t_s1_t_rc1_s2_t = s2_t + " " + s1_t + " " + tags[rc1_s2] if rc1_s2 >= 0 else "<empty>"
         s2_t_s1_w_rc1_s2_t = s2_t + " " + s1_w + " " + tags[rc1_s2] if lc1_s2 >= 0 else "<empty>"
         s2_t_s1_w_lc1_s1_t = s2_t + " " + s1_w + " " + tags[lc1_s1] if lc1_s1 >= 0 else "<empty>"
-        s2_t_s1_w_b1_t = s2_t + " " + s1_w + " " +  b1_t
 
         feat.append("b1_w:" + b1_w)
         feat.append("b1_t:" + b1_t)
         feat.append("b1_wt:" + b1_wt)
+
+        feat.append("b2_w:" + b2_w)
+        feat.append("b2_t:" + b2_t)
+        feat.append("b2_wt:" + b2_wt)
+
+        feat.append("b3_w:" + b3_w)
+        feat.append("b3_t:" + b3_t)
+        feat.append("b3_wt:" + b3_wt)
 
         feat.append("s1_w:" + s1_w)
         feat.append("s1_t:" + s1_t)
@@ -372,14 +391,14 @@ class Parser():
         feat.append("s2_t:" + s2_t)
         feat.append("s2_wt:" + s2_wt)
 
-        feat.append("s1_wt_s2_wt:" + s1_wt_s2_wt)
-        feat.append("s1_wt_s2_w:" + s1_wt_s2_w)
-        feat.append("s1_wt_s2_t:" + s1_wt_s2_t)
-        feat.append("s1_w_s2_wt:" + s1_w_s2_wt)
-        feat.append("s1_t_s2_wt:" + s1_t_s2_wt)
-        feat.append("s1_w_s2_w:" + s1_w_s2_w)
-        feat.append("s1_t_s2_t:" + s1_t_s2_t)
-        feat.append("s1_t_b1_t:" + s1_t_b1_t)
+        feat.append("s1_wt_s2_wt:" + s1_wt + " " + s2_wt)
+        feat.append("s1_wt_s2_w:" + s1_wt + " " + s2_w)
+        feat.append("s1_wt_s2_t:" + s1_wt + " " + s2_t)
+        feat.append("s1_w_s2_wt:" + s1_w + " " + s2_wt)
+        feat.append("s1_t_s2_wt:" + s1_t + " " + s2_wt)
+        feat.append("s1_w_s2_w:" + s1_w + " " + s2_w)
+        feat.append("s1_t_s2_t:" + s1_t + " " + s2_t)
+        feat.append("s1_t_b1_t:" + s1_t + " " + b1_t)
 
         feat.append("s2_t_s1_t_b1_t:" + s2_t_s1_t_b1_t)
         feat.append("s2_t_s1_t_lc1_s1_t:" + s2_t_s1_t_lc1_s1_t)
@@ -388,7 +407,14 @@ class Parser():
         feat.append("s2_t_s1_t_rc1_s2_t:" + s2_t_s1_t_rc1_s2_t)
         feat.append("s2_t_s1_w_rc1_s2_t:" + s2_t_s1_w_rc1_s2_t)
         feat.append("s2_t_s1_w_lc1_s1_t:" + s2_t_s1_w_lc1_s1_t)
-        feat.append("s2_t_s1_w_b1_t:" + s2_t_s1_w_b1_t) 
+        #feat.append("s2_t_s1_w_b1_t:" + s2_t_s1_w_b1_t) 
+
+        '''
+        feat.append("a:"+tags[lc1_s1])
+        feat.append("b:"+tags[rc1_s1])
+        feat.append("c:"+tags[rc1_s2])
+        feat.append("d:"+tags[rc1_s2])
+        '''
 
         return feat
 

@@ -91,13 +91,13 @@ class Parser():
                 configuration.
         """
         moves = []
-        if len(buffer) > 0 and buffer[0] != 0:
+        if len(buffer) > 0:
             moves.append(0)
-        if len(stack) > 0:
+        if len(stack) > 2:
             moves.append(1)
-        if len(stack) > 1:
+        if len(stack) > 0:
             moves.append(2)
-        if len(stack) > 0 and len(buffer) > 1 and stack[-1] < buffer[0]:
+        if len(stack) > 1 and buffer and stack[-1] < buffer[0]:
             moves.append(3)
         return moves
 
@@ -198,12 +198,15 @@ class Parser():
         tags = self.tagger.tag(words)
         pred_tree = [0] * len(words)
         stack = []
-        buffer = list(range(1,len(words))) + [0]
+        buffer = list(range(len(words)))
         while self.valid_moves(buffer, stack, pred_tree):
+          
             feat = self.features(words, tags, buffer, stack, pred_tree)
             gold_move = self.gold_move(buffer, stack, pred_tree, gold_tree, word_order)
+            
             self.classifier.update(feat,gold_move)
             buffer, stack, pred_tree = self.move(buffer, stack, pred_tree, gold_move)
+        
         return tags, pred_tree
 
     def train(self, data, n_epochs=1, trunc_data=None):
@@ -257,7 +260,7 @@ class Parser():
         if len(stack) > 0 and buffer and buffer[0] == gold_tree[stack[-1]]:
             left_arc_possible = True
             for j in range(len(pred_tree)):
-                if gold_tree[j] == buffer[0]:
+                if gold_tree[j] == stack[-1]:
                     if pred_tree[j] == 0:
                         left_arc_possible = False
         right_arc_possible = False
@@ -268,8 +271,8 @@ class Parser():
                     if pred_tree[j] == 0:
                         right_arc_possible = False
         swap_possible = False
-        if len(stack) > 2 and \
-            word_order.index(stack[-1]) < word_order.index(stack[-2]):
+        if len(stack) > 2 and buffer and \
+            word_order.index(stack[-1]) < word_order.index(buffer[0]):
             swap_possible = True
         if left_arc_possible:
             return 1
@@ -346,19 +349,19 @@ class Parser():
                     return i
             return -1
 
-        lc1_s1 = lc1(words[stack[-1]]) if stack else -1
-        rc1_s1 = rc1(words[stack[-1]]) if stack else -1
-        lc1_s2 = lc1(words[stack[-2]]) if len(stack) > 1 else -1
-        rc1_s2 = rc1(words[stack[-2]]) if len(stack) > 1 else -1
+        #lc1_s1 = lc1(words[stack[-1]]) if stack else -1
+        #rc1_s1 = rc1(words[stack[-1]]) if stack else -1
+        #lc1_s2 = lc1(words[stack[-2]]) if len(stack) > 1 else -1
+        #rc1_s2 = rc1(words[stack[-2]]) if len(stack) > 1 else -13
 
-        s2_t_s1_t_b1_t = s2_t + " " + s1_t + " " + b1_t
-        s2_t_s1_t_lc1_s1_t = s2_t + " " + s1_t + " " + tags[lc1_s1] if lc1_s1 >= 0 else "<empty>"
-        s2_t_s1_t_rc1_s1_t = s2_t + " " + s1_t + " " + tags[rc1_s1] if rc1_s1 >= 0 else "<empty>"
-        s2_t_s1_t_lc1_s2_t = s2_t + " " + s1_t + " " + tags[rc1_s2] if lc1_s2 >= 0 else "<empty>"
-        s2_t_s1_t_rc1_s2_t = s2_t + " " + s1_t + " " + tags[rc1_s2] if rc1_s2 >= 0 else "<empty>"
-        s2_t_s1_w_rc1_s2_t = s2_t + " " + s1_w + " " + tags[rc1_s2] if lc1_s2 >= 0 else "<empty>"
-        s2_t_s1_w_lc1_s1_t = s2_t + " " + s1_w + " " + tags[lc1_s1] if lc1_s1 >= 0 else "<empty>"
-        s2_t_s1_w_b1_t = s2_t + " " + s1_w + " " +  b1_t
+        #s2_t_s1_t_b1_t = s2_t + " " + s1_t + " " + b1_t
+        #s2_t_s1_t_lc1_s1_t = s2_t + " " + s1_t + " " + tags[lc1_s1] if lc1_s1 >= 0 else "<empty>"
+        #s2_t_s1_t_rc1_s1_t = s2_t + " " + s1_t + " " + tags[rc1_s1] if rc1_s1 >= 0 else "<empty>"
+        #s2_t_s1_t_lc1_s2_t = s2_t + " " + s1_t + " " + tags[rc1_s2] if lc1_s2 >= 0 else "<empty>"
+        #s2_t_s1_t_rc1_s2_t = s2_t + " " + s1_t + " " + tags[rc1_s2] if rc1_s2 >= 0 else "<empty>"
+        #s2_t_s1_w_rc1_s2_t = s2_t + " " + s1_w + " " + tags[rc1_s2] if lc1_s2 >= 0 else "<empty>"
+        #s2_t_s1_w_lc1_s1_t = s2_t + " " + s1_w + " " + tags[lc1_s1] if lc1_s1 >= 0 else "<empty>"
+        #s2_t_s1_w_b1_t = s2_t + " " + s1_w + " " +  b1_t
 
         feat.append("b1_w:" + b1_w)
         feat.append("b1_t:" + b1_t)
@@ -381,14 +384,14 @@ class Parser():
         feat.append("s1_t_s2_t:" + s1_t_s2_t)
         feat.append("s1_t_b1_t:" + s1_t_b1_t)
 
-        feat.append("s2_t_s1_t_b1_t:" + s2_t_s1_t_b1_t)
-        feat.append("s2_t_s1_t_lc1_s1_t:" + s2_t_s1_t_lc1_s1_t)
-        feat.append("s2_t_s1_t_rc1_s1_t:" + s2_t_s1_t_rc1_s1_t)
-        feat.append("s2_t_s1_t_lc1_s2_t:" + s2_t_s1_t_lc1_s2_t)
-        feat.append("s2_t_s1_t_rc1_s2_t:" + s2_t_s1_t_rc1_s2_t)
-        feat.append("s2_t_s1_w_rc1_s2_t:" + s2_t_s1_w_rc1_s2_t)
-        feat.append("s2_t_s1_w_lc1_s1_t:" + s2_t_s1_w_lc1_s1_t)
-        feat.append("s2_t_s1_w_b1_t:" + s2_t_s1_w_b1_t) 
+        #feat.append("s2_t_s1_t_b1_t:" + s2_t_s1_t_b1_t)
+        #feat.append("s2_t_s1_t_lc1_s1_t:" + s2_t_s1_t_lc1_s1_t)
+        #feat.append("s2_t_s1_t_rc1_s1_t:" + s2_t_s1_t_rc1_s1_t)
+        #feat.append("s2_t_s1_t_lc1_s2_t:" + s2_t_s1_t_lc1_s2_t)
+        #feat.append("s2_t_s1_t_rc1_s2_t:" + s2_t_s1_t_rc1_s2_t)
+        #feat.append("s2_t_s1_w_rc1_s2_t:" + s2_t_s1_w_rc1_s2_t)
+        #feat.append("s2_t_s1_w_lc1_s1_t:" + s2_t_s1_w_lc1_s1_t)
+        #feat.append("s2_t_s1_w_b1_t:" + s2_t_s1_w_b1_t) 
 
         return feat
 
