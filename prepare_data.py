@@ -6,6 +6,7 @@ import shutil
 import pickle
 import logging
 from nlp_tools import *
+from data_utils import *
 logging.getLogger().setLevel(logging.INFO)
 
 if len(sys.argv) != 4:
