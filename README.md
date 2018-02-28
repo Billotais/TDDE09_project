@@ -101,3 +101,8 @@ Further improvement of the features :
 Replaced the greedy search by a beam search : 
 
 - No improvement in accuracy
+
+Use features like left-most child, ...
+
+- EN : 69.38% to 76.70%
+- SV : 65.14% to 71.79%

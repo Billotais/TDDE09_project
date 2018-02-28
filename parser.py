@@ -304,6 +304,14 @@ class Parser():
         b1_t = tags[buffer[0]] if buffer else "<empty>"
         b1_wt = b1_w + " " + b1_t
 
+        b2_w = words[buffer[1]] if len(buffer) > 1 else "<empty>"
+        b2_t = tags[buffer[1]] if len(buffer) > 1 else "<empty>"
+        b2_wt = b2_w + " " + b2_t
+
+        b3_w = words[buffer[2]] if len(buffer) > 2 else "<empty>"
+        b3_t = tags[buffer[2]] if len(buffer) > 2 else "<empty>"
+        b3_wt = b3_w + " " + b3_t
+
         s1_w = words[stack[-1]] if stack else "<empty>"
         s1_t = tags[stack[-1]] if stack else "<empty>"
         s1_wt = s1_w + " " + s1_t
@@ -312,16 +320,10 @@ class Parser():
         s2_t = tags[stack[-2]] if len(stack) > 1 else "<empty>"
         s2_wt = s2_w + " " + s2_t
 
-        # Double words features
 
-        s1_wt_s2_wt = s1_wt + " " + s2_wt
-        s1_wt_s2_w = s1_wt + " " + s2_w
-        s1_wt_s2_t = s1_wt + " " + s2_t
-        s1_w_s2_wt = s1_w + " " + s2_wt
-        s1_t_s2_wt = s1_t + " " + s2_wt
-        s1_w_s2_w = s1_w + " " + s2_w
-        s1_t_s2_t = s1_t + " " + s2_t
-        s1_t_b1_t = s1_t + " " + b1_t
+        #for i in parse:
+         #   if stack and parse[stack[-1]] == i:
+          #      feat.append("tag" + str(i) + str(tags[i])) 
 
          # Triple word features
 
@@ -346,10 +348,10 @@ class Parser():
                     return i
             return -1
 
-        lc1_s1 = lc1(words[stack[-1]]) if stack else -1
-        rc1_s1 = rc1(words[stack[-1]]) if stack else -1
-        lc1_s2 = lc1(words[stack[-2]]) if len(stack) > 1 else -1
-        rc1_s2 = rc1(words[stack[-2]]) if len(stack) > 1 else -1
+        lc1_s1 = lc1(stack[-1]) if stack else -1
+        rc1_s1 = rc1(stack[-1]) if stack else -1
+        lc1_s2 = lc1(stack[-2]) if len(stack) > 1 else -1
+        rc1_s2 = rc1(stack[-2]) if len(stack) > 1 else -1
 
         s2_t_s1_t_b1_t = s2_t + " " + s1_t + " " + b1_t
         s2_t_s1_t_lc1_s1_t = s2_t + " " + s1_t + " " + tags[lc1_s1] if lc1_s1 >= 0 else "<empty>"
@@ -364,6 +366,14 @@ class Parser():
         feat.append("b1_t:" + b1_t)
         feat.append("b1_wt:" + b1_wt)
 
+        feat.append("b2_w:" + b2_w)
+        feat.append("b2_t:" + b2_t)
+        feat.append("b2_wt:" + b2_wt)
+
+        feat.append("b3_w:" + b3_w)
+        feat.append("b3_t:" + b3_t)
+        feat.append("b3_wt:" + b3_wt)
+
         feat.append("s1_w:" + s1_w)
         feat.append("s1_t:" + s1_t)
         feat.append("s1_wt:" + s1_wt)
@@ -372,14 +382,14 @@ class Parser():
         feat.append("s2_t:" + s2_t)
         feat.append("s2_wt:" + s2_wt)
 
-        feat.append("s1_wt_s2_wt:" + s1_wt_s2_wt)
-        feat.append("s1_wt_s2_w:" + s1_wt_s2_w)
-        feat.append("s1_wt_s2_t:" + s1_wt_s2_t)
-        feat.append("s1_w_s2_wt:" + s1_w_s2_wt)
-        feat.append("s1_t_s2_wt:" + s1_t_s2_wt)
-        feat.append("s1_w_s2_w:" + s1_w_s2_w)
-        feat.append("s1_t_s2_t:" + s1_t_s2_t)
-        feat.append("s1_t_b1_t:" + s1_t_b1_t)
+        feat.append("s1_wt_s2_wt:" + s1_wt + " " + s2_wt)
+        feat.append("s1_wt_s2_w:" + s1_wt + " " + s2_w)
+        feat.append("s1_wt_s2_t:" + s1_wt + " " + s2_t)
+        feat.append("s1_w_s2_wt:" + s1_w + " " + s2_wt)
+        feat.append("s1_t_s2_wt:" + s1_t + " " + s2_wt)
+        feat.append("s1_w_s2_w:" + s1_w + " " + s2_w)
+        feat.append("s1_t_s2_t:" + s1_t + " " + s2_t)
+        feat.append("s1_t_b1_t:" + s1_t + " " + b1_t)
 
         feat.append("s2_t_s1_t_b1_t:" + s2_t_s1_t_b1_t)
         feat.append("s2_t_s1_t_lc1_s1_t:" + s2_t_s1_t_lc1_s1_t)
