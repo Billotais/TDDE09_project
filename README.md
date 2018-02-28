@@ -24,6 +24,8 @@ with Python 3.6.
 
 `$ git clone https://github.com/UniversalDependencies/UD_French-GSD.git`
 
+`$ git clone https://github.com/UniversalDependencies/UD_German-GSD.git`
+
 ### Clone the baseline system:
 `$ git clone git@gitlab.ida.liu.se:nlp2018-group3/baseline-system.git`
 
@@ -43,14 +45,20 @@ In order to run the advanced system, simply run <br>
 `$ python3 evaluate_system.py --train ../UD_Swedish-Talbanken/sv-ud-train.conllu ../UD_Swedish-Talbanken/sv-ud-dev.conllu`
 <br>for the Swedish dataset and<br>
 `$ python3 evaluate_system.py --train ../UD_French-GSD/fr-ud-train.conllu ../UD_French-GSD/fr-ud-dev.conllu`
-<br>for the French dataset. The function loads the training data, trains the tagger, 
-trains the parser based on the trained tagger and finally evaluates the system on the test dataset. In the following the results for the English and the Swedish treebank can be found:<br>
+<br>for the French dataset.<br>
+`$ python evaluate_system.py --train ../UD_German-GSD/de-ud-train.conllu ../UD_German-GSD/de-ud-dev.conllu`
+<br>for the German dataset.
+
+The function loads the training data, trains the tagger, 
+trains the parser based on the trained tagger and finally evaluates the system on the test dataset.
 
 ### Save and load models
 To train and save a model
 `$ python evaluate_system.py --train ../UD_English-EWT/en-ud-train.conllu ../UD_English-EWT/en-ud-dev.conllu --save english.trained`
 To load a trained mode
 `$ python evaluate_system.py ../UD_English-EWT/en-ud-dev.conllu --load english.trained`
+
+In the following the results for the English and the Swedish treebank can be found:<br>
 
 English Treebank:
 
