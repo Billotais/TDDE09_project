@@ -111,9 +111,9 @@ def process_data(data, model_path):
 
 
 def load_processed_data(trained_dir):
-    voc = json.loads(open(trained_dir + 'voc.json').read())
-    voc_inv = json.loads(open(trained_dir + 'voc_inv.json').read())
-    tag_dict_inv = json.loads(open(trained_dir + 'tag_dict_inv.json').read())
+    voc = json.loads(open(trained_dir + 'voc.json',encoding='utf-8').read())
+    voc_inv = json.loads(open(trained_dir + 'voc_inv.json',encoding='utf-8').read())
+    tag_dict_inv = json.loads(open(trained_dir + 'tag_dict_inv.json',encoding='utf-8').read())
 
     with open(trained_dir + 'sent_lens.pickle', 'rb') as input_file:
         fetched_sent_lens = pickle.load(input_file)

@@ -48,14 +48,14 @@ with open(trained_dir + 'tags.pickle', 'wb') as outfile:
     pickle.dump(tags, outfile, pickle.HIGHEST_PROTOCOL)
     logging.info('Data matrix y saved')
 
-with open(trained_dir + 'voc.json', 'w') as outfile:
+with open(trained_dir + 'voc.json', 'w',encoding='utf-8') as outfile:
     json.dump(voc, outfile, indent=4, ensure_ascii=False)
     logging.info('Voc dict saved')
 
-with open(trained_dir + 'voc_inv.json', 'w') as outfile:
+with open(trained_dir + 'voc_inv.json', 'w',encoding='utf-8') as outfile:
     json.dump(voc_inv, outfile, indent=4, ensure_ascii=False)
     logging.info('Voc_inv dict saved')
 
-with open(trained_dir + 'tag_dict_inv.json', 'w') as outfile:
+with open(trained_dir + 'tag_dict_inv.json', 'w',encoding='utf-8') as outfile:
     json.dump(tag_dict_inv, outfile, indent=4, ensure_ascii=False)
     logging.info('Tag dict saved')
