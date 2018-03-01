@@ -228,11 +228,11 @@ class Parser():
                 candidates = self.valid_moves(buffer, stack, pred_tree)
                 if candidates:
                     next_move, scores = self.classifier.predict(feat, candidates)
-                    if not scores or next_move == "None":
+                    if not scores:
                         self.classifier.update(feat,gold_move)
                         next_move, scores = self.classifier.predict(feat, candidates)
                     if gold_move not in scores:
-                        scores[gold_move] = 1
+                        scores[gold_move] = 0
                     # apply softmax on the scores 
                     scores_lst = [(k, v) for k, v in scores.items()]
                     softmax_scores = softmax(list(zip(*scores_lst))[1])
