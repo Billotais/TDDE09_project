@@ -212,7 +212,6 @@ class Parser():
         buffer = list(range(len(words)))
         next_move = 0
         is_gold = True
-#        self.classifier.update(feat,0)
         possible_trees = [( score, pred_tree, stack, buffer, next_move, is_gold )]
         while any(tree[4] != None for tree in possible_trees):
             flag = 0
