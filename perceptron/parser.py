@@ -55,6 +55,7 @@ class Parser():
         return scores
     
     def update_and_reset_config(self, config, feat, gold_move):
+        config['next_move'] = gold_move
         self.classifier.update(feat,gold_move)
         return [config]
 
