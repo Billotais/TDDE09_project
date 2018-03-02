@@ -26,25 +26,25 @@ with Python 3.6.
 
 `$ git clone https://github.com/UniversalDependencies/UD_German-GSD.git`
 
-### Clone the baseline system:
-`$ git clone git@gitlab.ida.liu.se:nlp2018-group3/baseline-system.git`
+### Clone the advances system:
+`$ git clone git@gitlab.ida.liu.se:nlp2018-group3/advanced-system.git`
 
-`$ cd baseline-system`
+`$ cd advanced-system`
 
-## NN
+## Neural Network using Tensorflow
 Prepare data <br>
 `$ python3 prepare_data.py ../UD_English-EWT/en-ud-train.conllu ../UD_English-EWT/en-ud-dev.conllu ../UD_English-EWT/en-ud-test.conllu ./train_config.json`
 <br>Train <br>
 `$ python3 train.py ./train_config.json`
 
-## Run
+## Run the parser
 In order to run the advanced system, simply run <br>
 `$ python3 evaluate_system.py --train ../UD_English-EWT/en-ud-train.conllu ../UD_English-EWT/en-ud-dev.conllu` 
 <br>for the English dataset,<br>
 `$ python3 evaluate_system.py --train ../UD_Swedish-Talbanken/sv-ud-train.conllu ../UD_Swedish-Talbanken/sv-ud-dev.conllu`
-<br>for the Swedish dataset and<br>
+<br>for the Swedish dataset,<br>
 `$ python3 evaluate_system.py --train ../UD_French-GSD/fr-ud-train.conllu ../UD_French-GSD/fr-ud-dev.conllu`
-<br>for the French dataset.<br>
+<br>for the French dataset and<br>
 `$ python evaluate_system.py --train ../UD_German-GSD/de-ud-train.conllu ../UD_German-GSD/de-ud-dev.conllu`
 <br>for the German dataset.
 
@@ -54,71 +54,56 @@ trains the parser based on the trained tagger and finally evaluates the system o
 ### Save and load models
 To train and save a model
 `$ python evaluate_system.py --train ../UD_English-EWT/en-ud-train.conllu ../UD_English-EWT/en-ud-dev.conllu --save english.trained`
+
 To load a trained mode
 `$ python evaluate_system.py ../UD_English-EWT/en-ud-dev.conllu --load english.trained`
 
-In the following the results for the English and the Swedish treebank can be found:<br>
+### Available options
+`--train file` To train the parser using training data
 
-English Treebank:
+`--load file` To load a trained parser from a file
 
-    Training POS tagger
-    Epoch: 1 / 3
-    Updated with sentence #12542
-    Epoch: 2 / 3
-    Updated with sentence #12542
-    Epoch: 3 / 3
-    Updated with sentence #12542
-    Training syntactic parser:
-    Epoch: 1 / 3
-    Updated with sentence #12542
-    Epoch: 2 / 3
-    Updated with sentence #12542
-    Epoch: 3 / 3
-    Updated with sentence #12542
-    Evaluation:
-    Tagging accuracy: 93.26%
-    Unlabelled attachment score: 65.29%
+`--save file` To save the trained parser to a file
 
-Swedish Treebank:
+`--trunc_data n` To only train on the n first sentences
 
-    Training POS tagger
-    Epoch: 1 / 3
-    Updated with sentence #4302
-    Epoch: 2 / 3
-    Updated with sentence #4302
-    Epoch: 3 / 3
-    Updated with sentence #4302
-    Training syntactic parser:
-    Epoch: 1 / 3
-    Updated with sentence #4302
-    Epoch: 2 / 3
-    Updated with sentence #4302
-    Epoch: 3 / 3
-    Updated with sentence #4302
-    Evaluation:
-    Tagging accuracy: 93.69%
-    Unlabelled attachment score: 59.65%
+`--n_epochs n` Set the number of training epochs 
 
-French Treebank:
+`--beam_size n` Set the size of the beam during evaluation
 
-    Training POS tagger
-    Epoch: 1 / 3
-    Updated with sentence #14553
-    Epoch: 2 / 3
-    Updated with sentence #14553
-    Epoch: 3 / 3
-    Updated with sentence #14553
-    Training syntactic parser:
-    Epoch: 1 / 3
-    Updated with sentence #14553
-    Epoch: 2 / 3
-    Updated with sentence #14553
-    Epoch: 3 / 3
-    Updated with sentence #14553
-    Evaluation:
-    Tagging accuracy: 96.57%
-    Unlabelled attachment score: 81.33%
 
+
+We got the following results with our parser using the simple Perceptron : 
+
+#### English (on en-ud-dev.conllu)
+
+| Beam size  |Tagging accuracy|Unlabelled attachement score|Exact Matches|
+|------------|----------------|----------------------------|-------------|
+|1           |93.34%          |76.26%                      |41.41%       |
+|2           |93.34%          |76.63%                      |42.01%       |
+|8           |93.34%          |76.65%                      |42.16%       |
+|32          |93.34%          |76.63%                      |42.16%       |
+|64          |93.34%          |76.66%                      |42.16%       |
+
+#### French (on fr-ud-dev.conllu)
+
+| Beam size  |Tagging accuracy|Unlabelled attachement score|Exact Matches|
+|------------|----------------|----------------------------|-------------|
+|1           |96.57%          |81.34%                      |16.85%       |
+|2           |96.57%          |81.78%                      |17.52%       |
+|8           |96.57%          |81.90%                      |18.00%       |
+|32          |96.57%          |81.92%                      |18.00%       |
+|64          |96.57%          |81.93%                      |18.00%       |
+
+#### Swedish (on sv-ud-dev.conllu)
+
+| Beam size  |Tagging accuracy|Unlabelled attachement score|Exact Matches|
+|------------|----------------|----------------------------|-------------|
+|1           |93.62%          |72.43%                      |18.06%       |
+|2           |96.57%          |72.53%                      |18.45%       |
+|8           |96.57%          |72.62%                      |18.65%       |
+|32          |96.57%          |72.45%                      |18.65%       |
+|64          |96.57%          |72.59%                      |18.65%       |
 
 
 # Abstract

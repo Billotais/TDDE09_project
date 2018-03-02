@@ -13,9 +13,11 @@ def load_data(filename):
     return data
 
 def softmax(z):
+    if len(z) == 1:
+        return [1]
     z_exp = [1.1**i for i in z]
     sum_z_exp = sum(z_exp)
-    return [round(i / sum_z_exp, 3) for i in z_exp]
+    return [i / sum_z_exp for i in z_exp]
 
 def accuracy(preds, golds, correction=0):
     count = -correction

@@ -34,7 +34,7 @@ class Parser():
         self.tagger = tagger
         self.classifier = Perceptron()
 
-    def parse(self, words, beam_thresh=10, beam_size=1):
+    def parse(self, words, beam_thresh=0, beam_size=1):
         """Parses a sentence.
 
         Args:
@@ -190,7 +190,7 @@ class Parser():
                         del tree[ind]
         return word_order
 
-    def update(self, words, gold_tags, gold_tree):
+    def update(self, words, gold_tags, gold_tree, beam_thresh=0, beam_size=1):
         """Updates the move classifier with a single training
         instance.
 
@@ -206,15 +206,142 @@ class Parser():
         """
         word_order = self.get_word_order(gold_tree)
         tags = self.tagger.tag(words)
+        score = 0
         pred_tree = [0] * len(words)
         stack = []
         buffer = list(range(len(words)))
-        while self.valid_moves(buffer, stack, pred_tree):
-            feat = self.features(words, tags, buffer, stack, pred_tree)
-            gold_move = self.gold_move(buffer, stack, pred_tree, gold_tree, word_order)
-            self.classifier.update(feat,gold_move)
-            buffer, stack, pred_tree = self.move(buffer, stack, pred_tree, gold_move)
-        return tags, pred_tree
+        next_move = 0
+        is_gold = True
+        possible_trees = [( score, pred_tree, stack, buffer, next_move, is_gold )]
+        while any(tree[4] != None for tree in possible_trees):
+            flag = 0
+            for i, (score, pred_tree, stack, buffer, next_move, is_gold) \
+                    in enumerate(possible_trees):
+                buffer, stack, pred_tree = self.move(buffer, \
+                    stack, pred_tree, next_move)
+                feat = self.features(words, tags, buffer, stack, pred_tree)
+                gold_move = self.gold_move(buffer, stack, pred_tree, gold_tree, word_order)
+                candidates = self.valid_moves(buffer, stack, pred_tree)
+                if candidates:
+                    next_move, scores = self.classifier.predict(feat, candidates)
+                    while gold_move not in scores:
+                        self.classifier.update(feat,gold_move)
+                        next_move, scores = self.classifier.predict(feat, candidates)
+                    # apply softmax on the scores 
+                    scores_lst = [(k, v) for k, v in scores.items()]
+                    softmax_scores = softmax(list(zip(*scores_lst))[1])
+                    scores = dict(list(zip( list(zip(*scores_lst))[0], softmax_scores )))
+                    # add new configs for the other possible moves
+                    for curr_move, curr_score in scores.items():
+                        if curr_move != next_move and curr_score > beam_thresh:
+                            flag += 1 
+                            # create a copy of the config and append it to the list
+                            curr_is_gold = is_gold
+                            if gold_move != curr_move:
+                                curr_is_gold = False
+                            possible_trees.append((score+log(curr_score), \
+                            pred_tree.copy(), stack.copy(), buffer.copy(), curr_move, curr_is_gold))
+                    if gold_move != next_move:
+                        is_gold = False
+                    score += log(scores[next_move])
+                else:
+                    next_move = None
+                possible_trees[i] = (score, pred_tree, stack, buffer, next_move, is_gold)
+                # do not run the for loop for the just added configs
+                if i+1+flag == len(possible_trees):
+                    break
+            # delete the configs with the lowest scores
+            max_tree = max(possible_trees, key = lambda t: t[0])
+            while len(possible_trees) > beam_size:
+                min_tree_ind, min_tree = min(enumerate(possible_trees), key = lambda t: t[1][0])
+                if min_tree[5] == True:
+                    feat = self.features(words, tags, max_tree[3], max_tree[2], max_tree[1])
+                    self.classifier.update(feat,gold_move)
+                    possible_trees = [min_tree]
+                else:
+                    del possible_trees[min_tree_ind]
+        # return best tree
+        return tags, max_tree[1]
+    
+        #######################################################
+        #######################################################
+        '''
+        beam_size = 16
+        beam_thresh = 0
+        word_order = self.get_word_order(gold_tree)
+        tags = self.tagger.tag(words)
+
+        score = 0
+        pred_tree = [0] * len(words)
+        stack = []
+        buffer = list(range(len(words)))
+        next_move = 0
+        history = []
+        is_gold = False
+        possible_trees = [( score, pred_tree, stack, buffer, next_move, history, is_gold)]   
+       
+
+        while any(tree[4] != None for tree in possible_trees):
+            flag = 0
+            for i, (score, pred_tree, stack, buffer, next_move, history, is_gold) \
+                    in enumerate(possible_trees):
+
+                  
+                buffer, stack, pred_tree = self.move(buffer, \
+                    stack, pred_tree, next_move)
+
+                feat = self.features(words, tags, buffer, stack, pred_tree)
+                candidates = self.valid_moves(buffer, stack, pred_tree)
+                gold_move = self.gold_move(buffer, stack, pred_tree, gold_tree, word_order)
+                next_move, scores = self.classifier.predict(feat, candidates)
+                if scores:
+
+                    # apply softmax on the scores 
+                    scores_lst = [(k, v) for k, v in scores.items()]
+                    softmax_scores = softmax(list(zip(*scores_lst))[1])
+                    scores = dict(list(zip( list(zip(*scores_lst))[0], softmax_scores )))
+                    # add new configs for the other possible moves
+                    for curr_move, curr_score in scores.items():
+                        if curr_move != next_move and curr_score > beam_thresh:
+                            flag += 1 
+                            # create a copy of the config and append it to the list
+                             
+                            possible_trees.append((score+log(curr_score), \
+                            pred_tree.copy(), stack.copy(), buffer.copy(), curr_move, history.copy().append((feat, curr_move)),curr_move == gold_move))
+                    score += log(scores[next_move])
+                else:
+                    next_move = None
+                possible_trees[i] = (score, pred_tree, stack, buffer, next_move, history.append((feat, next_move)),next_move == gold_move)
+                # do not run the for loop for the just added configs
+                if i+1+flag == len(possible_trees):
+                    break
+            # delete the configs with the lowest scores
+            while len(possible_trees) > beam_size:
+                to_delete = min(enumerate(possible_trees), \
+                    key = lambda t: t[1][0])
+                # IF the tree to delete is the god_tree, train the classifier negativly with the higher score tree in the beam
+                if to_delete[6]:
+                    best_tree = max(possible_trees, key = lambda t: t[0])
+                    best_tree_history = best_tree[5]
+                    for f,m in best_tree_history.items():
+                        self.classifier.update_neg(f, m)
+                    return tags, best_tree
+                    
+                del possible_trees[min(enumerate(possible_trees), \
+                    key = lambda t: t[1][0])[0]]
+
+        # In this case the gold_tree wasn't removed from the beam => we train with its values
+        for t in possible_trees:
+            if t[6]:
+                for f, m in t[5]: # go through history
+                    self.classifier.update(f, m)
+                return tags, t[1]
+        
+        '''
+        #################################################################
+        #################################################################
+
+        
 
     def train(self, data, n_epochs=1, trunc_data=None):
         """Trains the parser on training data.
