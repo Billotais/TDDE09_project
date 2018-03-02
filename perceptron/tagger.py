@@ -1,5 +1,5 @@
-from perceptron import Perceptron
-from nlp_tools import get_sentences, get_tags
+from perceptron.perceptron import Perceptron
+from perceptron.nlp_tools import get_sentences, get_tags
 
 class Tagger():
     """A part-of-speech tagger based on a multi-class perceptron

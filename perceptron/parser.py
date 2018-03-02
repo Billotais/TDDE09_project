@@ -1,5 +1,5 @@
-from perceptron import Perceptron
-from nlp_tools import softmax, get_sentences, get_tags, get_trees
+from perceptron.perceptron import Perceptron
+from perceptron.nlp_tools import softmax, get_sentences, get_tags, get_trees
 from math import log
 
 class Parser():

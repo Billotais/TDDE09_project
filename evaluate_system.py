@@ -1,7 +1,7 @@
 import itertools, pickle, argparse
-from parser import Parser
-from tagger import Tagger
-from nlp_tools import load_data, accuracy, get_sentences, get_tags, get_trees
+from perceptron.parser import Parser
+from perceptron.tagger import Tagger
+from perceptron.nlp_tools import load_data, accuracy, get_sentences, get_tags, get_trees
 
 argparser = argparse.ArgumentParser(description='Evaluate the NLP system.')
 argparser.add_argument('evaluation_data', metavar='path to evaluation data', type=str,
