@@ -28,7 +28,7 @@ if args.train:
     tagger = Tagger()
     tagger.train(train_data, n_epochs=args.n_epochs, trunc_data=args.trunc_data)
     parser = Parser(tagger)
-    parser.train(train_data, n_epochs=args.n_epochs, trunc_data=args.trunc_data)
+    parser.train(train_data, beam_size=args.beam_size, n_epochs=args.n_epochs, trunc_data=args.trunc_data)
 
 if args.train and args.save:
     with open(args.save, 'wb') as output:
@@ -48,7 +48,7 @@ pred_trees = []
 correction = 0
 for i, sentence in enumerate(get_sentences(dev_data)):
     print("\rEvaluated with sentence #{}".format(i), end="")
-    pred_tags, pred_tree = parser.parse(sentence, beam_thresh=0, beam_size=args.beam_size)
+    pred_tags, pred_tree = parser.parse(sentence, beam_size=args.beam_size)
     pred_tags_lst += pred_tags
     pred_trees_lst += pred_tree
     pred_trees.append(pred_tree)
