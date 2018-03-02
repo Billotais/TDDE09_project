@@ -43,7 +43,6 @@ class Parser():
         config['buffer'] = list(range(len(words)))
         config['next_move'] = 0
         config['is_gold'] = True
-        config['transition-seq'] = []
         return config
 
     def predict(self, feat, candidates):
@@ -157,7 +156,6 @@ class Parser():
             containing the index of the new first unprocessed word,
             stack, and partial dependency tree.
         """
-        config['transition-seq'].append(config['next_move'])
         if config['next_move'] == 0:
             config['stack'].append(config['buffer'].pop(0))
         elif config['next_move'] == 1:
@@ -429,12 +427,6 @@ class Parser():
         feat.append("c:"+tags[rc1_s2])
         feat.append("d:"+tags[rc1_s2])
         '''
-
-        feat.append('t:'+str(config['transition-seq']))
-        feat.append('t1:'+str(config['transition-seq'][-1:]))
-        feat.append('t2:'+str(config['transition-seq'][-2:]))
-        feat.append('t3:'+str(config['transition-seq'][-3:]))
-        feat.append('t4:'+str(config['transition-seq'][-4:]))
 
         return feat
 
