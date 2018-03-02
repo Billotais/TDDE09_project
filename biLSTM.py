@@ -99,6 +99,7 @@ class BiLSTM(GenericModel):
     def get_feed_dict(self, words, sequence_len, labels=None):
         feed = {
             self.word_ids: words,
+            #self.seq_len: sequence_len+2,
             self.seq_len: sequence_len,
             self.learning_rate: self.config['learning_rate'],
             self.dropout: self.config['dropout']

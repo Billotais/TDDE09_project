@@ -62,7 +62,13 @@ def load_embeddings(voc_inv, config):
     embeddings = []
     model = KeyedVectors.load_word2vec_format(config['wv_location'], binary=True, limit=config['emb_limit'])
     for i, _ in enumerate(voc_inv):
-        if voc_inv[i] in model:
+        if voc_inv[i] == '<BOS/>':
+            embeddings.append(np.zeros(300))
+        elif voc_inv[i] == '<EOS/>':
+            embeddings.append(np.zeros(300))
+        elif voc_inv[i] == '<PAD/':
+            embeddings.append(np.zeros(300))
+        elif voc_inv[i] in model:
             embeddings.append(model[voc_inv[i]])
         else:
             embeddings.append(np.random.uniform(-0.25, 0.25, 300))
@@ -94,6 +100,7 @@ def pad_sents(sents, seq_len, pad = '<PAD/>'):
         sent = sents[i]
         sent_len = len(sent)
         num_pad = seq_len - sent_len
+        # padded_seq = '<BOS/>' + sent + '<EOS/>' + [pad] * num_pad
         padded_seq = sent + [pad] * num_pad
         padded_sents.append(padded_seq)
         sent_lens.append(sent_len)
@@ -143,18 +150,12 @@ def process_data(config, data, dev_data=None):
     else:
         return x_emb, x, y, tags, voc, voc_inv, tag_dict_inv, sent_lens
 
-<<<<<<< HEAD
+
 def load_processed_data(trained_dir, dev=False):
     if dev is False:
         voc = json.loads(open(trained_dir + 'voc.json').read())
         voc_inv = json.loads(open(trained_dir + 'voc_inv.json').read())
         tag_dict_inv = json.loads(open(trained_dir + 'tag_dict_inv.json').read())
-=======
-def load_processed_data(trained_dir):
-    voc = json.loads(open(trained_dir + 'voc.json',encoding='utf-8').read())
-    voc_inv = json.loads(open(trained_dir + 'voc_inv.json',encoding='utf-8').read())
-    tag_dict_inv = json.loads(open(trained_dir + 'tag_dict_inv.json',encoding='utf-8').read())
->>>>>>> 22392a6899343411480148657102e6d656ae4097
 
         with open(trained_dir + 'y.pickle', 'rb') as input_file:
             fetched_y = pickle.load(input_file)
