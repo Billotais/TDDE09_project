@@ -7,13 +7,14 @@ class Perceptron():
         self.count = 1
 
     def predict(self, x, candidates=None):
-        """Predicts the class for a document.
+        """Predicts the class, based on a feature vector
 
         Args:
-            x: A document, represented as a list of words.
+            x: a feature vector
+            candidates: possible classes to choose from
 
         Returns:
-            The predicted class, represented as a string.
+            The best predicted class, all classes with their respective scores
         """
         scores = {}
         for curr_class in self.weights:
@@ -36,11 +37,11 @@ class Perceptron():
         """Updates the weight vectors with a single training instance.
 
         Args:
-            x: A document, represented as a list of words.
-            y: The gold-standard class, represented as a string.
+            x: a feature vector
+            y: The gold-standard class
 
         Returns:
-            The predicted class, represented as a string.
+            The predicted class
         """
         p, _ = self.predict(x)          
         if not p == y:
@@ -64,39 +65,8 @@ class Perceptron():
         self.count += 1
         return p 
 
-    def update_neg(self, x, y):
-        """Updates the weight vectors with a single negative training instance.
-
-        Args:
-            x: A document, represented as a list of words.
-            y: The gold-standard class, represented as a string.
-
-        Returns:
-            The predicted class, represented as a string.
-        """
-        p, _ = self.predict(x)          
-        if not p == y:
-            if y not in self.weights:
-                self.weights[y] = {}
-                self.acc[y] = {}
-            if p not in self.weights:
-                self.weights[p] = {}
-                self.acc[p] = {} 
-            for key in x:
-                if key not in self.weights[p]:
-                    self.weights[p][key] = 0
-                    self.acc[p][key] = 0
-                self.weights[p][key] += 1
-                self.acc[p][key] -= self.count
-                if key not in self.weights[y]:
-                    self.weights[y][key] = 0
-                    self.acc[y][key] = 0
-                self.weights[y][key] -= 1
-                self.acc[y][key] += self.count
-        self.count += 1
-        return p 
-
     def finalize(self):
+        """Finalize the averaged perceptron"""
         for curr_class in self.weights:
             for tok in self.weights[curr_class]:
                 self.weights[curr_class][tok] -= self.acc[curr_class][tok]/self.count
