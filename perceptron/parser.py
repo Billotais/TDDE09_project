@@ -64,14 +64,12 @@ class Parser():
         Returns:
             the possible moves with their respective scores
         """
-        # Use the perceptron to get the scores of each moves
         _, scores = self.classifier.predict(feat, candidates)
         if scores:
             # apply softmax on the scores 
             scores_lst = [(k, v) for k, v in scores.items()]
             softmax_scores = softmax(list(zip(*scores_lst))[1])
             scores = dict(list(zip(list(zip(*scores_lst))[0], softmax_scores)))
-
         return scores
     
     def update_and_reset_config(self, config, feat, gold_move):
@@ -106,11 +104,9 @@ class Parser():
         """
         if gold_tree:
             word_order = self.get_word_order(gold_tree)
-
         tags = self.tagger.tag(words)
         possible_configs = [self.initial_config(words)]
-
-        while any(config['next_move'] for config in possible_configs):
+        while any(config['next_move'] != None for config in possible_configs):
             old_possible_configs = possible_configs
             possible_configs = []
             for config in old_possible_configs:
@@ -130,7 +126,10 @@ class Parser():
                     for curr_move, curr_score in scores.items():
                         # create a copy of the config and append it to the list
                         new_config = deepcopy(config)
-                        new_config['score'] += log(curr_score) if curr_score > 0 else float("-inf")
+                        if curr_score > 0:
+                            new_config['score'] += log(curr_score)
+                        else:
+                            new_config['score'] += float("-inf")
                         new_config['next_move'] = curr_move
                         if gold_tree and gold_move != curr_move:
                             new_config['is_gold'] = False
@@ -138,14 +137,12 @@ class Parser():
                 else:
                     config['next_move'] = None
                     possible_configs.append(config)
-
             # delete the configs with the lowest scores
             while len(possible_configs) > beam_size:
                 worst_conf_ind, worst_conf = \
                     min(enumerate(possible_configs), 
                         key = lambda t: t[1]['score'])
-
-                if gold_tree and worst_conf['is_gold']:
+                if gold_tree and worst_conf['is_gold'] == True:
                     feat = self.features(words, tags, worst_conf)
                     possible_configs = self.update_and_reset_config( \
                                     worst_conf, feat, worst_conf['next_move'])
@@ -173,7 +170,7 @@ class Parser():
             moves.append(1)
         if len(config['stack']) > 1:
             moves.append(2)
-        if len(config['stack']) > 2 and config['stack'][-1] > config['stack'][-2]:
+        if len(config['stack']) > 2 and config['stack'][-1]>config['stack'][-2]:
             moves.append(3)
         return moves
 
@@ -214,7 +211,8 @@ class Parser():
             return True
         if descendant:
             return self.is_descendant(tree, ancestor, tree[descendant])
-        return False
+        else:
+            return False
 
     def get_word_order(self, gold_tree):
         """Returns the word order such that the tree would be projective
@@ -282,8 +280,9 @@ class Parser():
         for e in range(n_epochs):
             print("Epoch:", e+1, "/", n_epochs)
             train_sentences_tags_trees = zip(   get_sentences(data), \
+                                                get_tags(data), \
                                                 get_trees(data) )
-            for i, (words, gold_tree) in \
+            for i, (words, gold_tags, gold_tree) in \
                                         enumerate(train_sentences_tags_trees):
                 self.parse(words, gold_tree, beam_size=beam_size)
                 print("\rUpdated with sentence #{}".format(i), end="")
@@ -311,7 +310,6 @@ class Parser():
         buffer = config['buffer']
         stack = config['stack']
         pred_tree = config['pred_tree']
-
         left_arc_possible = False
         if len(stack) > 2 and stack[-1] == gold_tree[stack[-2]]:
             left_arc_possible = True
@@ -319,7 +317,6 @@ class Parser():
                 if gold_tree[j] == stack[-2]:
                     if pred_tree[j] == 0:
                         left_arc_possible = False
-
         right_arc_possible = False
         if len(stack) > 1 and stack[-2] == gold_tree[stack[-1]]:
             right_arc_possible = True
@@ -327,12 +324,10 @@ class Parser():
                 if gold_tree[j] == stack[-1]:
                     if pred_tree[j] == 0:
                         right_arc_possible = False
-
         swap_possible = False
         if len(stack) > 2 and \
             word_order.index(stack[-1]) < word_order.index(stack[-2]):
             swap_possible = True
-
         if left_arc_possible:
             return 1
         elif right_arc_possible:
@@ -382,6 +377,11 @@ class Parser():
         s2_t = tags[stack[-2]] if len(stack) > 1 else "<empty>"
         s2_wt = s2_w + " " + s2_t
 
+        '''
+        for i in pred_tree:
+            if stack and pred_tree[stack[-1]] == i:
+                feat.append("tag" + str(i) + str(tags[i]))
+        '''
 
         # Triple word features
 
@@ -394,7 +394,7 @@ class Parser():
 
         # Child that is the most on the left
         def lc1(parent):
-            for i in range(len(words)):
+            for i in range(0, len(words)):
                 if is_parent(parent, i):
                     return i
             return -1
@@ -473,6 +473,7 @@ class Parser():
         feat.append("s2_t_s1_t_rc1_s2_t:" + s2_t_s1_t_rc1_s2_t)
         feat.append("s2_t_s1_w_rc1_s2_t:" + s2_t_s1_w_rc1_s2_t)
         feat.append("s2_t_s1_w_lc1_s1_t:" + s2_t_s1_w_lc1_s1_t)
+
 
         return feat
 
