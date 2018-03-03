@@ -1,6 +1,7 @@
 import math
 
 def load_data(filename):
+    """Load some data from a file in the CONLLU format"""
     data = [[]]
     with open(filename, encoding='utf-8') as source:
         for line in source:

@@ -79,6 +79,16 @@ We got the following results with our parser using the simple Perceptron :
 
 | Beam size  |Tagging accuracy|Unlabelled attachement score|Exact Matches|
 |------------|----------------|----------------------------|-------------|
+|1           |93.34%          |76.11%                      |41.66%       |.
+|2           |93.34%          |76.11%                      |42.11%       |.
+|8           |93.34%          |76.65%                      |42.16%       |
+|16          |93.34%          |76.63%                      |42.16%       |
+|32          |93.34%          |76.66%                      |42.16%       |
+
+
+## (Old values with not correct beam search)
+| Beam size  |Tagging accuracy|Unlabelled attachement score|Exact Matches|
+|------------|----------------|----------------------------|-------------|
 |1           |93.34%          |76.26%                      |41.41%       |
 |2           |93.34%          |76.63%                      |42.01%       |
 |8           |93.34%          |76.65%                      |42.16%       |
