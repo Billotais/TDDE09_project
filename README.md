@@ -110,7 +110,8 @@ We got the following results with our parser using the simple Perceptron :
 |1           |96.57%          |81.22%                      |16.71%       |
 |2           |96.57%          |81.56%                      |17.12%       |
 |4           |96.57%          |81.29%                      |17.25%       |
-
+|8           |96.57%          |81.11%                      |16.64%       |
+|16          |96.57%          |80.90%                      |16.91%       |
 
 
 
