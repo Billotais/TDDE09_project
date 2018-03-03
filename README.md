@@ -1,3 +1,12 @@
+
+# Abstract
+
+From the baseline system, we decided to develop two different independent systems. 
+
+On one side, we tried to improve the accuracy of the parser by changing some aspect of the training and prediction algorithms, but we kept the same simple percepton. We implemented better features and non-projective tree support with the SWAP operation We also tried to use beam-search instead of greedy-search during both training and parsing, but we got some unexpected results. We experimented with arc-eager transition based system instead of arc-standard and with sentence generation to provide the parser with a bigger training data set, but we decided not to include theses changes for various reasons.
+
+In parallel, we developped ...
+
 # Get up and running
 This is a guide to get started as quickly as possible with the advanced system,
 for a more detailed explanation of each class, refer to the
@@ -12,7 +21,7 @@ Further languages can be found online in the UniversalDependencies repository.
 If you want to get a feeling for how the system works feel free to see the 
 section “Run” below.
 
-### Dependencies
+### Dependencies          
 In order to be able to run the model it is of course necessary
 to have all necessary packages installed. All of the packages needed come
 with Python 3.6.
@@ -89,16 +98,17 @@ We got the following results with our parser using the simple Perceptron :
 
 | Beam size  |Tagging accuracy|Unlabelled attachement score|Exact Matches|
 |------------|----------------|----------------------------|-------------|
-|1           |93.62%          |71.98%                      |17.78%       |.
-|2           |93.62%          |71.66%                      |18.25%       |.
-|8           |93.62%          |70.23%                      |17.66%       |.
-|16          |93.62%          |69.44%                      |16.87%       |.
-|32          |93.62%          |72.59%                      |18.65%       |
+|1           |93.62%          |71.98%                      |17.78%       |
+|2           |93.62%          |71.66%                      |18.25%       |
+|8           |93.62%          |70.23%                      |17.66%       |
+|16          |93.62%          |69.44%                      |16.87%       |
+|32          |93.62%          |68.14%                      |16.27%       |
 
 #### French
 | Beam size  |Tagging accuracy|Unlabelled attachement score|Exact Matches|
 |------------|----------------|----------------------------|-------------|
 |1           |96.57%          |81.22%                      |16.71%       |
+|2           |96.57%          |81.56%                      |17.12%       |
 
 
 

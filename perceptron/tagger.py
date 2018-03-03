@@ -57,6 +57,7 @@ class Tagger():
             features.append("w_2"+words[i+2])
         if i+3 < len(words):
             features.append("w_3"+words[i+3])
+
         features.append("suff1_0="+words[i][-1])
         features.append("suff2_0="+words[i][-2:])
         features.append("suff3_0="+words[i][-3:])
@@ -111,7 +112,7 @@ class Tagger():
             train_sentences_tags = zip( get_sentences(data), get_tags(data) )
             for i, (words, tags) in enumerate(train_sentences_tags):
                 print("\rUpdated with sentence #{}".format(i), end="")
-                pred_tags = self.update(words,tags)
+                self.update(words,tags)
                 if trunc_data and i >= trunc_data:
                     break
             print("")
