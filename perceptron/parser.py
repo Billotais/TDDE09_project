@@ -16,7 +16,7 @@ class Parser():
     SHIFT = 0, LEFT-ARC = 1, RIGHT-ARC = 2, SWAP = 3
 
     At any given point in the predicted sequence, the state of the
-    parser can be specified by: the index of the first word in the
+    parser can be specified by: a buffer containing the words in the
     input sentence that the parser has not yet started to process; a
     stack holding the indices of those words that are currently being
     processed; and a partial dependency tree, represented as a list of
@@ -31,11 +31,19 @@ class Parser():
     """
 
     def __init__(self, tagger):
-        """Initialises a new parser."""
+        """Initializes a new parser."""
         self.tagger = tagger
         self.classifier = Perceptron()
 
     def initial_config(self,words):
+        """Initializes the config for the parser
+        
+        Args:
+            words: the words of a sentence
+            
+        Returns:
+            a initial parser config
+        """
         config = {}
         config['score'] = 0
         config['pred_tree'] = [0] * len(words)
@@ -46,15 +54,37 @@ class Parser():
         return config
 
     def predict(self, feat, candidates):
+        """Calls the predict function of the classifier and applies the softmax
+            function on the scores
+        
+        Args:
+            feat: a feature vector
+            candidates: the possible moves
+        
+        Returns:
+            the possible moves with their respective scores
+        """
         _, scores = self.classifier.predict(feat, candidates)
         if scores:
             # apply softmax on the scores 
             scores_lst = [(k, v) for k, v in scores.items()]
             softmax_scores = softmax(list(zip(*scores_lst))[1])
-            scores = dict(list(zip( list(zip(*scores_lst))[0], softmax_scores )))
+            scores = dict(list(zip(list(zip(*scores_lst))[0], softmax_scores)))
         return scores
     
     def update_and_reset_config(self, config, feat, gold_move):
+        """This functions is called when the gold_tree falls of the beam. It
+        updates the classifier and resets the parser config such that only the
+        gold configuration is in the beam.
+        
+        Args:
+            config: the parser gold config
+            feat: a featire vector
+            gold_move: the correct move
+            
+        Returns:
+            the new config
+        """
         config['next_move'] = gold_move
         self.classifier.update(feat,gold_move)
         return [config]
@@ -65,6 +95,8 @@ class Parser():
 
         Args:
             words: The input sentence, a list of words.
+            gold_tree: if a gold_tree is passed, the classifier is trained
+            beam_size: the width of the beam, when using beam search
 
         Returns:
             A pair consisting of the predicted tags and the predicted
@@ -84,9 +116,11 @@ class Parser():
                     feat = self.features(words, tags, config)
                     scores = self.predict(feat, candidates)
                     if gold_tree:
-                        gold_move = self.gold_move(config, gold_tree, word_order)
+                        gold_move = self.gold_move(config, gold_tree, \
+                                                    word_order)
                         if config['is_gold'] and gold_move not in scores:
-                            possible_configs = self.update_and_reset_config(config, feat, gold_move)
+                            possible_configs = self.update_and_reset_config( \
+                                                        config, feat, gold_move)
                             break
                     # add new configs for the possible moves
                     for curr_move, curr_score in scores.items():
@@ -106,10 +140,12 @@ class Parser():
             # delete the configs with the lowest scores
             while len(possible_configs) > beam_size:
                 worst_conf_ind, worst_conf = \
-                    min(enumerate(possible_configs), key = lambda t: t[1]['score'])
+                    min(enumerate(possible_configs), 
+                        key = lambda t: t[1]['score'])
                 if gold_tree and worst_conf['is_gold'] == True:
                     feat = self.features(words, tags, worst_conf)
-                    possible_configs = self.update_and_reset_config(worst_conf, feat, worst_conf['next_move'])
+                    possible_configs = self.update_and_reset_config( \
+                                    worst_conf, feat, worst_conf['next_move'])
                 else:
                     del possible_configs[worst_conf_ind]
         # return best tree
@@ -121,10 +157,7 @@ class Parser():
         configuration.
 
         Args:
-            buffer:
-            stack: The stack of words (represented by their indices)
-                that are currently being processed.
-            pred_tree: The partial dependency tree.
+            config: the current parser configuration
 
         Returns:
             The list of valid moves for the specified parser
@@ -137,7 +170,7 @@ class Parser():
             moves.append(1)
         if len(config['stack']) > 1:
             moves.append(2)
-        if len(config['stack']) > 2 and config['stack'][-1] > config['stack'][-2]:
+        if len(config['stack']) > 2 and config['stack'][-1]>config['stack'][-2]:
             moves.append(3)
         return moves
 
@@ -145,16 +178,10 @@ class Parser():
         """Executes a single move.
 
         Args:
-            buffer: 
-            stack: The stack of words (represented by their indices)
-                that are currently being processed.
-            pred_tree: The partial dependency tree.
-            move: The move that the parser should make.
+            config: the current parser configuration
 
         Returns:
-            The new parser configuration, represented as a triple
-            containing the index of the new first unprocessed word,
-            stack, and partial dependency tree.
+            The new parser configuration
         """
         if config['next_move'] == 0:
             config['stack'].append(config['buffer'].pop(0))
@@ -168,15 +195,34 @@ class Parser():
             config['buffer'].insert(0, config['stack'].pop(-2))
         return config
 
-    def is_descendant(self, tree, desc, child):
-        if desc == child:
+    def is_descendant(self, tree, ancestor, descendant):
+        """Returns true if a certain node is a descendant of another node or
+            ancestor == descendant
+        
+        Args:
+            tree: the dependency tree
+            ancestor: the ancestor node
+            descendant: the descendant node
+            
+        Returns:
+            True or False
+        """
+        if ancestor == descendant:
             return True
-        if child:
-            return self.is_descendant(tree, desc, tree[child])
+        if descendant:
+            return self.is_descendant(tree, ancestor, tree[descendant])
         else:
             return False
 
     def get_word_order(self, gold_tree):
+        """Returns the word order such that the tree would be projective
+        
+        Args:
+            gold_tree: the pependency tree of a sentence
+            
+        Returns:
+            list of word indices
+        """
         words = list(range(len(gold_tree)))
         tree = gold_tree.copy()
         word_order = [words.pop(0)]
@@ -220,13 +266,15 @@ class Parser():
                         del tree[ind]
         return word_order    
 
-    def train(self, data, beam_size, n_epochs=1, trunc_data=None):
+    def train(self, data, beam_size=10, n_epochs=1, trunc_data=None):
         """Trains the parser on training data.
 
         Args:
             data: Training data, a list of sentences with gold trees.
-            n_epochs:
-            trunc_data:
+            beam_size: the width of the beam, when using beam search
+            n_epochs: for how many epochs the parser should be trained 
+            trunc_data: if it should stop after processing only a port of the
+                        data (only used during development)
         """
         print("Training syntactic parser:")
         for e in range(n_epochs):
@@ -234,7 +282,8 @@ class Parser():
             train_sentences_tags_trees = zip(   get_sentences(data), \
                                                 get_tags(data), \
                                                 get_trees(data) )
-            for i, (words, gold_tags, gold_tree) in enumerate(train_sentences_tags_trees):
+            for i, (words, gold_tags, gold_tree) in \
+                                        enumerate(train_sentences_tags_trees):
                 self.parse(words, gold_tree, beam_size=beam_size)
                 print("\rUpdated with sentence #{}".format(i), end="")
                 if trunc_data and i >= trunc_data:
@@ -247,21 +296,12 @@ class Parser():
         configuration.
 
         The gold-standard move is the first possible move from the
-        following list: LEFT-ARC, RIGHT-ARC, SHIFT. LEFT-ARC is
-        possible if the topmost word on the stack is the gold-standard
-        head of the second-topmost word, and all words that have the
-        second-topmost word on the stack as their gold-standard head
-        have already been assigned their head in the predicted tree.
-        Symmetric conditions apply to RIGHT-ARC. SHIFT is possible if
-        at least one word in the input sentence still requires
-        processing.
+        following list: LEFT-ARC, RIGHT-ARC, SHIFT, SWAP. 
 
         Args:
-            buffer: 
-            stack: The stack of words (represented by their indices)
-                that are currently being processed.
-            pred_tree: The partial dependency tree.
+            buffer: the current configuration of the parser
             gold_tree: The gold-standard dependency tree.
+            word_order: the projective word order
 
         Returns:
             The gold-standard move for the specified parser
@@ -304,19 +344,15 @@ class Parser():
 
         Args:
             words: The input sentence, a list of words.
-            gold_tags: The list of gold-standard tags for the input
-                sentence.
-            buffer: 
-            stack: The stack of words (represented by their indices)
-                that are currently being processed.
-            parse: The partial dependency tree.
+            tags: The list of tags for the input sentence.
+            config: the current configuration of the parser
 
         Returns:
             A feature vector for the specified configuration.
         """
         buffer = config['buffer']
         stack = config['stack']
-        parse = config['pred_tree']
+        pred_tree = config['pred_tree']
 
         feat = []
 
@@ -342,8 +378,8 @@ class Parser():
         s2_wt = s2_w + " " + s2_t
 
         '''
-        for i in parse:
-            if stack and parse[stack[-1]] == i:
+        for i in pred_tree:
+            if stack and pred_tree[stack[-1]] == i:
                 feat.append("tag" + str(i) + str(tags[i]))
         '''
 
@@ -354,7 +390,7 @@ class Parser():
                 return False
             if parent == child:
                 return True
-            return is_parent(parent, parse[child])
+            return is_parent(parent, pred_tree[child])
 
         # Child that is the most on the left
         def lc1(parent):
@@ -376,12 +412,30 @@ class Parser():
         rc1_s2 = rc1(stack[-2]) if len(stack) > 1 else -1
 
         s2_t_s1_t_b1_t = s2_t + " " + s1_t + " " + b1_t
-        s2_t_s1_t_lc1_s1_t = s2_t + " " + s1_t + " " + tags[lc1_s1] if lc1_s1 >= 0 else "<empty>"
-        s2_t_s1_t_rc1_s1_t = s2_t + " " + s1_t + " " + tags[rc1_s1] if rc1_s1 >= 0 else "<empty>"
-        s2_t_s1_t_lc1_s2_t = s2_t + " " + s1_t + " " + tags[rc1_s2] if lc1_s2 >= 0 else "<empty>"
-        s2_t_s1_t_rc1_s2_t = s2_t + " " + s1_t + " " + tags[rc1_s2] if rc1_s2 >= 0 else "<empty>"
-        s2_t_s1_w_rc1_s2_t = s2_t + " " + s1_w + " " + tags[rc1_s2] if lc1_s2 >= 0 else "<empty>"
-        s2_t_s1_w_lc1_s1_t = s2_t + " " + s1_w + " " + tags[lc1_s1] if lc1_s1 >= 0 else "<empty>"
+        if lc1_s1 >= 0:
+            s2_t_s1_t_lc1_s1_t = s2_t + " " + s1_t + " " + tags[lc1_s1]
+        else:
+            s2_t_s1_t_lc1_s1_t = "<empty>"
+        if rc1_s1 >= 0:
+            s2_t_s1_t_rc1_s1_t = s2_t + " " + s1_t + " " + tags[rc1_s1]
+        else:
+            s2_t_s1_t_rc1_s1_t = "<empty>"
+        if lc1_s2 >= 0:
+            s2_t_s1_t_lc1_s2_t = s2_t + " " + s1_t + " " + tags[rc1_s2]
+        else:
+            s2_t_s1_t_lc1_s2_t = "<empty>"
+        if rc1_s2 >= 0:
+            s2_t_s1_t_rc1_s2_t = s2_t + " " + s1_t + " " + tags[rc1_s2]
+        else:
+            s2_t_s1_t_rc1_s2_t = "<empty>"
+        if lc1_s2 >= 0:
+            s2_t_s1_w_rc1_s2_t = s2_t + " " + s1_w + " " + tags[rc1_s2]
+        else:
+            s2_t_s1_w_rc1_s2_t = "<empty>"
+        if lc1_s1 >= 0:
+            s2_t_s1_w_lc1_s1_t = s2_t + " " + s1_w + " " + tags[lc1_s1]
+        else:
+            s2_t_s1_w_lc1_s1_t = "<empty>"
 
         feat.append("b1_w:" + b1_w)
         feat.append("b1_t:" + b1_t)
