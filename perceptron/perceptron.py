@@ -66,7 +66,7 @@ class Perceptron():
         return p 
 
     def finalize(self):
-        """Finalize the averaged perceptron"""
+        """Finalizes the classifier by averaging its weight vectors."""
         for curr_class in self.weights:
             for tok in self.weights[curr_class]:
                 self.weights[curr_class][tok] -= self.acc[curr_class][tok]/self.count
