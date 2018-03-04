@@ -29,13 +29,13 @@ class GenericModel(object):
     def restore_sess(self):
         """Loads model from given directory dir"""
         logging.info("Restore session from trained model: Weights loaded!")
-        self.saver.restore(self.sess, self.config['model_dir'])
+        self.saver.restore(self.sess, self.config['model_dir']+"model.ckpt")
 
     def save_sess(self):
         """Saves a session and its weights"""
         if not os.path.exists(self.config['model_dir']):
             os.makedirs(self.config['model_dir'])
-        self.saver.save(self.sess, self.config['model_dir'])
+        self.saver.save(self.sess, self.config['model_dir']+"model.ckpt")
 
     def close_sess(self):
         """Closes a session"""
