@@ -127,8 +127,8 @@ class BiLSTM(GenericModel):
         acc = np.mean(accs) * 100
         return acc
 
-    def tag(self, sentence):
+    def tag(self, sentence, lens):
         '''Returns list of tags'''
-        pred_ids, _ = self.predict_batch(sentence, 1)
+        pred_ids, _ = self.predict_batch(sentence, lens)
         pred_tags = [self.tag_dict_inv[idx] for idx in list(pred_ids[0])]
         return pred_tags
