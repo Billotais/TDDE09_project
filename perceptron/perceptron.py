@@ -52,22 +52,11 @@ class Perceptron():
                 self.weights[p] = {}
                 self.acc[p] = {} 
             for key in x:
-                if key not in self.weights[p]:
-                    self.weights[p][key] = 0
-                    self.acc[p][key] = 0
-                self.weights[p][key] -= 1
-                self.acc[p][key] -= self.count
-                '''self.weights[p][key] = self.weights[p].get(key, 0) - 1
+                self.weights[p][key] = self.weights[p].get(key, 0) - 1
                 self.acc[p][key]     = self.acc[p].get(key, 0) - self.count
 
                 self.weights[y][key] = self.weights[y].get(key, 0) + 1
-                self.acc[y][key]     = self.acc[y].get(key, 0) + self.count'''
-                if key not in self.weights[y]:
-                    self.weights[y][key] = 0
-                    self.acc[y][key] = 0
-                self.weights[y][key] += 1
-                self.acc[y][key] += self.count
-
+                self.acc[y][key]     = self.acc[y].get(key, 0) + self.count
         self.count += 1
         return p 
 
