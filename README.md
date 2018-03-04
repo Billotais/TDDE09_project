@@ -42,11 +42,13 @@ with Python 3.6.
 
 `$ cd advanced-system`
 
-## Neural Network using Tensorflow
+
+## LSTM using Tensorflow
 Prepare data <br>
 `$ python3 prepare_data.py ../UD_English-EWT/en-ud-train.conllu ../UD_English-EWT/en-ud-dev.conllu ../UD_English-EWT/en-ud-test.conllu ./train_config.json`
 <br>Train <br>
-`$ python3 train.py ./train_config.json`
+`$ python3 train.py ./train_config.json` <br>
+Note the train.py trains and evaluates the LSTM tagger on the English dataset with an final accuracy of 89.84 % with the given settings.
 
 ## Run the parser
 In order to run the advanced system, simply run <br>
