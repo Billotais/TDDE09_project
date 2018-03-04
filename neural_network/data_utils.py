@@ -7,15 +7,6 @@ import shutil
 import logging
 logging.getLogger().setLevel(logging.INFO)
 
-
-def get_trees(data):
-    for sentence in data:
-        out = []
-        out.append(0)
-        for word in sentence:
-            out.append(int(word[6]))
-        yield out
-
 def load_data(filename):
     data = [[]]
     with open(filename, encoding='utf-8') as source:
@@ -58,17 +49,20 @@ def get_tags(data):
         tags.append(out)
     return tags
 
+def get_trees(data):
+    trees = []
+    for sent in data:
+        out = []
+        for word in sent:
+            out.append(int(word[6]))
+        trees.append(out)   
+    return trees
+
 def load_embeddings(voc_inv, config):
     embeddings = []
     model = KeyedVectors.load_word2vec_format(config['wv_location'], binary=True, limit=config['emb_limit'])
     for i, _ in enumerate(voc_inv):
-        if voc_inv[i] == '<BOS/>':
-            embeddings.append(np.zeros(300))
-        elif voc_inv[i] == '<EOS/>':
-            embeddings.append(np.zeros(300))
-        elif voc_inv[i] == '<PAD/':
-            embeddings.append(np.zeros(300))
-        elif voc_inv[i] in model:
+        if voc_inv[i] in model:
             embeddings.append(model[voc_inv[i]])
         else:
             embeddings.append(np.random.uniform(-0.25, 0.25, 300))
@@ -100,17 +94,17 @@ def pad_sents(sents, seq_len, pad = '<PAD/>'):
         sent = sents[i]
         sent_len = len(sent)
         num_pad = seq_len - sent_len
-        # padded_seq = '<BOS/>' + sent + '<EOS/>' + [pad] * num_pad
         padded_seq = sent + [pad] * num_pad
         padded_sents.append(padded_seq)
         sent_lens.append(sent_len)
-    return padded_sents, sent_lens
+    return padded_sents, sent_lens  
 
 def process_data(config, data, dev_data=None):
     x, max_len_sents = get_sentences(data)
+    
     if dev_data is not None:
         x_test, max_test = get_sentences(dev_data)
-        max_len_sents = max(max_len_sents, max_test)
+        max_len_sents = max(max_len_sents, max_test) 
 
     x, sent_lens = pad_sents(x, max_len_sents)
     if dev_data is not None:
@@ -134,6 +128,20 @@ def process_data(config, data, dev_data=None):
     else:
         tag_dict, tag_dict_inv = build_dict(tags)
 
+    tree = get_trees(data)
+
+    if dev_data is not None:
+        tree_dev = get_trees(dev_data)
+
+    tree, _ = pad_sents(tree, max_len_sents, pad=-1)
+    
+    if dev_data is not None:
+        tree_dev, _ = pad_sents(tree_dev, max_len_sents, pad=-1)
+
+    tree = np.array(tree)
+    if dev_data is not None:
+        tree_dev = np.array(tree_dev) 
+
     x = np.array([[voc[word] for word in sentence] for sentence in x])
     if dev_data is not None:
         x_test = np.array([[voc[word] for word in sentence] for sentence in x_test])
@@ -146,16 +154,16 @@ def process_data(config, data, dev_data=None):
     y = get_tag_matrix(tag_dict_inv)
 
     if dev_data is not None:
-        return x_emb, x, x_test, y, tags, tags_test, voc, voc_inv, tag_dict_inv, sent_lens, test_lens
+        return x_emb, x, x_test, y, tags, tags_test, voc, voc_inv, tag_dict, tag_dict_inv, sent_lens, test_lens, tree, tree_dev
     else:
-        return x_emb, x, y, tags, voc, voc_inv, tag_dict_inv, sent_lens
-
+        return x_emb, x, y, tags, voc, voc_inv, tag_dict, tag_dict_inv, sent_lens, tree
 
 def load_processed_data(trained_dir, dev=False):
     if dev is False:
         voc = json.loads(open(trained_dir + 'voc.json').read())
         voc_inv = json.loads(open(trained_dir + 'voc_inv.json').read())
         tag_dict_inv = json.loads(open(trained_dir + 'tag_dict_inv.json').read())
+        tag_dict = json.loads(open(trained_dir + 'tag_dict.json').read())
 
         with open(trained_dir + 'y.pickle', 'rb') as input_file:
             fetched_y = pickle.load(input_file)
@@ -177,10 +185,15 @@ def load_processed_data(trained_dir, dev=False):
         fetched_tags = pickle.load(input_file)
     tags = np.array(fetched_tags, dtype = np.float32)
 
+    with open(trained_dir + 'tree.pickle', 'rb') as input_file:
+        tree = pickle.load(input_file)
+        tree = np.array(tree, dtype = np.float32)
+
     if dev is False:
-        return x_embeddings, x, y, tags, voc, voc_inv, tag_dict_inv, sent_lens
+        return x_embeddings, x, y, tags, voc, voc_inv, tag_dict, tag_dict_inv, sent_lens, tree
     else:
-        return x, tags, sent_lens
+        return x, tags, sent_lens, tree
+
 
 def make_dir(dir):
     if os.path.exists(dir):
@@ -188,7 +201,7 @@ def make_dir(dir):
     os.makedirs(dir)
     return dir
 
-def save_data_to_dir(dir, x_embeddings=None, x=None, y=None, tags=None, voc=None, voc_inv=None, tag_dict_inv=None, sent_lens=None):
+def save_data_to_dir(dir, x_embeddings=None, x=None, y=None, tags=None, voc=None, voc_inv=None, tag_dict=None, tag_dict_inv=None, sent_lens=None, tree=None):
     if sent_lens is not None:
         with open(dir + 'sent_lens.pickle', 'wb') as outfile:
             pickle.dump(sent_lens, outfile, pickle.HIGHEST_PROTOCOL)
@@ -217,10 +230,18 @@ def save_data_to_dir(dir, x_embeddings=None, x=None, y=None, tags=None, voc=None
         with open(dir + 'voc_inv.json', 'w') as outfile:
             json.dump(voc_inv, outfile, indent=4, ensure_ascii=False)
             logging.info('Voc_inv dict saved')
+    if tag_dict is not None:
+        with open(dir + 'tag_dict.json', 'w') as outfile:
+            json.dump(tag_dict, outfile, indent=4, ensure_ascii=False)
+            logging.info('Tag dict saved')        
     if tag_dict_inv is not None:
         with open(dir + 'tag_dict_inv.json', 'w') as outfile:
             json.dump(tag_dict_inv, outfile, indent=4, ensure_ascii=False)
             logging.info('Tag dict saved')
+    if tree is not None:
+        with open(dir + 'tree.pickle', 'wb') as outfile:
+            pickle.dump(tree, outfile, pickle.HIGHEST_PROTOCOL)
+            logging.info('tree saved')       
 
 
 

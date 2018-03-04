@@ -1,0 +1,34 @@
+{
+  "embedding_dim": 300,
+  "wv_location": "./data/GoogleNews.bin.gz",
+  "emb_limit": 1500000,
+  "processed_data_location": "./preprocessed_data/train/",
+  "processed_dev_data_location": "./preprocessed_data/dev/",
+  "processed_test_data_location":"./preprocessed_data/test/",
+
+  "tagger": {
+    "learning_rate": 0.001,
+    "decay_steps" : 10000,
+    "decay_rate" : 0.3,
+    "n_epochs": 1,
+    "model_dir" : "./nn_model/tagger/",
+    "batch_size": 256,
+    "n_epoch_no_imp": 3,
+    "dropout": 0.5,
+    "l2_reg": 1e-6,
+    "num_hidden": [1024]
+  },
+
+  "parser": {
+    "learning_rate": 0.001,
+    "decay_steps" : 10000,
+    "decay_rate" : 0.3,
+    "n_epochs": 1,
+    "model_dir" :  "./nn_model/parser/",
+    "batch_size": 256,
+    "n_epoch_no_imp": 3,
+    "dropout": 0.5,
+    "l2_reg": 1e-6,
+    "num_hidden": [512,512]
+  }
+}

@@ -76,7 +76,11 @@ class GenericModel(object):
                 excerpt = indices[start_idx:start_idx + batchsize]
             else:
                 excerpt = slice(start_idx, start_idx + batchsize)
-            yield inputs[excerpt], targets[excerpt], seq_len[excerpt]
+
+            if seq_len is not None:    
+                yield inputs[excerpt], targets[excerpt], seq_len[excerpt]
+            else:
+                yield inputs[excerpt], targets[excerpt]
 
 
 
