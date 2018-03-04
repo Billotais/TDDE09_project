@@ -82,9 +82,9 @@ To load a trained mode
 
 `--beam_size n` Set the size of the beam during evaluation
 
+## Results
 
-
-We got the following results with our parser using the simple Perceptron : 
+We got the following results with our parser using the simple Perceptron using the beam-search on both training and parsing
 
 #### English (on en-ud-dev.conllu)
 
@@ -124,7 +124,7 @@ We got the following results with our parser using the simple Perceptron :
 
 
 
-## (Old values with not correct beam search)
+When using the beam-search only on parsing, we got the following results.
 
 #### English
 | Beam size  |Tagging accuracy|Unlabelled attachement score|Exact Matches|
@@ -156,7 +156,7 @@ We got the following results with our parser using the simple Perceptron :
 |64          |96.57%          |72.59%                      |18.65%       |
 
 
-# Abstract
+# History of some milestones in accuracy
 
 Feature engineering on the parser : 
 
