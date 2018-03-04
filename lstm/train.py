@@ -20,7 +20,3 @@ logging.info('Data loaded!')
 biLSTM =BiLSTM(config, tag_dict_inv, x.shape[1], x_embeddings, len(tag_dict_inv))
 biLSTM.train(x, tags, x_dev, tags_dev, sent_lens, sent_lens_dev)
 
-#tagger = Tagger()
-#tagger.train(train_data, n_epochs=3, trunc_data=None)
-#parser = Parser(tagger)
-#parser.train(train_data, n_epochs=3, do_projectivize=True, trunc_data=None)

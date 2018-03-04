@@ -1,0 +1,16 @@
+{
+  "learning_rate": 0.001,
+  "decay_steps" : 10000,
+  "decay_rate" : 0.1,
+  "n_epochs": 15,
+  "model_dir" : "./model/",
+  "batch_size": 20,
+  "n_epoch_no_imp": 3,
+  "dropout": 0.5,
+  "embedding_dim": 300,
+  "emb_limit": 1500000,
+  "wv_location": "./data/GoogleNews.bin.gz",
+  "processed_data_location": "./preprocessed_data/train/",
+  "processed_dev_data_location": "./preprocessed_data/dev/",
+  "processed_test_data_location":"./preprocessed_data/test/"
+}
