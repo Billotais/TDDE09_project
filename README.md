@@ -1,11 +1,14 @@
 # Abstract
 
-From the baseline system, we decided to develop two different independent systems. 
+Starting from the baseline natural language processing system, we reimplemented various approaches from prior research. 
 
-On one side, we tried to improve the accuracy of the parser by changing some aspect of the training and prediction algorithms, but we kept the same simple percepton. We implemented better features and non-projective tree support with the SWAP operation We also tried to use beam-search instead of greedy-search during both training and parsing, but we got some unexpected results. We experimented with arc-eager transition based system instead of arc-standard and with sentence generation to provide the parser with a bigger training data set, but we decided not to include theses changes for various reasons.
+As the part-of-speech tagger of the baseline system already had an accuracy over 90%, we did not consider it at first, but the syntactic parser instead. 
 
-In parallel, we developped ...
+On one hand, we kept the perceptron and modified the training and the prediction algorithms of the parser. The implementation of better features led to the most significant improvement in the results. We further reimplemented non-projective tree support with the "swap"-operation, which did not lead to an increased accuracy. We also used beam-search instead of greedy-search during both training and parsing, but could again not improve our results. 
 
+On the other hand, we replaced the perceptron with a neural network for both the part-of-speech tagger as well as the syntactic parser. Hereby, we achieved reasonably good scores. However, for the part-of-speech tagger, they are still lower than with the feature engineering. 
+
+In our project, we show that by adding an approach from an existing paper to the system the score is not always improved. On the contrary, it seems that most approaches only lead to an improvement in the specific setup used for the paper. 
 # Get up and running
 This is a guide to get started as quickly as possible with the advanced system,
 for a more detailed explanation of each class, refer to the
@@ -83,8 +86,6 @@ To load a trained mode
 
 We got the following results with our parser using the simple Perceptron : 
 
-## Resuts with Beam search on training and parsing
-
 #### English (on en-ud-dev.conllu)
 
 | Beam size  |Tagging accuracy|Unlabelled attachement score|Exact Matches|
@@ -123,7 +124,7 @@ We got the following results with our parser using the simple Perceptron :
 
 
 
-## Beam search with only parsing
+## (Old values with not correct beam search)
 
 #### English
 | Beam size  |Tagging accuracy|Unlabelled attachement score|Exact Matches|
@@ -155,7 +156,7 @@ We got the following results with our parser using the simple Perceptron :
 |64          |96.57%          |72.59%                      |18.65%       |
 
 
-# Milestones
+# Abstract
 
 Feature engineering on the parser : 
 
