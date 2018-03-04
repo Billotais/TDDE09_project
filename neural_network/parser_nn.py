@@ -34,7 +34,7 @@ class Parser():
 
     def __init__(self, config, tagger):
         """Initialises a new parser."""
-        self.config = config['tagger']
+        self.config = config['parser']
 
         logging.getLogger().setLevel(logging.INFO)
 
@@ -212,25 +212,30 @@ class Parser():
         lc1_s2 = lc1(stack[-2]) if len(stack) > 1 else -1
         rc1_s2 = rc1(stack[-2]) if len(stack) > 1 else -1
 
-        lc1_lc1_s1 = lc1(lc1_s1) if lc1_s1 >=0 else -1
-        lc1_lc1_s2 = lc1(lc1_s2) if lc1_s2 >=0 else -1
-        rc1_rc1_s1 = rc1(rc1_s1) if rc1_s1 >=0 else -1
-        rc1_rc1_s2 = rc1(rc1_s2) if rc1_s2 >=0 else -1
+        
 
         lc1_s1_t = tags[lc1_s1] if lc1_s1 >= 0 else tag_pad
         rc1_s1_t = tags[rc1_s1] if rc1_s1 >= 0 else tag_pad
         lc1_s2_t = tags[rc1_s2] if lc1_s2 >= 0 else tag_pad
         rc1_s2_t = tags[rc1_s2] if rc1_s2 >= 0 else tag_pad
 
-        lc1_lc1_s1_t = tags[lc1_lc1_s1] if lc1_lc1_s1 >= 0 else tag_pad
-        lc1_lc1_s2_t = tags[lc1_lc1_s2] if lc1_lc1_s2 >= 0 else tag_pad
-        rc1_rc1_s1_t = tags[rc1_rc1_s1] if rc1_rc1_s1 >= 0 else tag_pad
-        rc1_rc1_s2_t = tags[rc1_rc1_s2] if rc1_rc1_s2 >= 0 else tag_pad
+        
 
         lc1_s1_w = words[lc1_s1] if lc1_s1 >= 0 else word_pad
         rc1_s1_w = words[rc1_s1] if rc1_s1 >= 0 else word_pad
         lc1_s2_w = words[rc1_s2] if lc1_s2 >= 0 else word_pad
         rc1_s2_w = words[rc1_s2] if rc1_s2 >= 0 else word_pad
+        
+
+        lc1_lc1_s1 = lc1(lc1_s1) if lc1_s1 >=0 else -1
+        lc1_lc1_s2 = lc1(lc1_s2) if lc1_s2 >=0 else -1
+        rc1_rc1_s1 = rc1(rc1_s1) if rc1_s1 >=0 else -1
+        rc1_rc1_s2 = rc1(rc1_s2) if rc1_s2 >=0 else -1
+
+        lc1_lc1_s1_t = tags[lc1_lc1_s1] if lc1_lc1_s1 >= 0 else tag_pad
+        lc1_lc1_s2_t = tags[lc1_lc1_s2] if lc1_lc1_s2 >= 0 else tag_pad
+        rc1_rc1_s1_t = tags[rc1_rc1_s1] if rc1_rc1_s1 >= 0 else tag_pad
+        rc1_rc1_s2_t = tags[rc1_rc1_s2] if rc1_rc1_s2 >= 0 else tag_pad
         
         lc1_lc1_s1_w = words[lc1_lc1_s1] if lc1_lc1_s1 >= 0 else word_pad
         lc1_lc1_s2_w = words[lc1_lc1_s2] if lc1_lc1_s2 >= 0 else word_pad
@@ -238,7 +243,9 @@ class Parser():
         rc1_rc1_s2_w = words[rc1_rc1_s2] if rc1_rc1_s2 >= 0 else word_pad
 
         feat = [b1_w, b2_w, b3_w, s1_w, s2_w, s3_w, lc1_s1_w, rc1_s1_w, lc1_s2_w, rc1_s2_w, lc1_lc1_s1_w, lc1_lc1_s2_w, rc1_rc1_s1_w, rc1_rc1_s2_w, b1_t, b2_t, b3_t, s1_t, s2_t, s3_t, lc1_s1_t, rc1_s1_t, lc1_s2_t, rc1_s2_t ,lc1_lc1_s1_t, lc1_lc1_s2_t, rc1_rc1_s1_t, rc1_rc1_s2_t]
-
+        """
+        feat = [b1_w, b2_w, b3_w, s1_w, s2_w, s3_w, lc1_s1_w, rc1_s1_w, lc1_s2_w, rc1_s2_w,b1_t, b2_t, b3_t, s1_t, s2_t, s3_t, lc1_s1_t, rc1_s1_t, lc1_s2_t, rc1_s2_t]
+        """
         return feat
 
     def train(self, load_data=False):
@@ -259,26 +266,21 @@ class Parser():
         for sent_id in range(self.tags.shape[0]):
             words = self.word_ids[sent_id, :int(self.sent_lens[sent_id])]
             words = words.tolist()
-            words_pad = [word_pad_id]*2 + words + [word_pad_id]*2
 
-            tags = [tag_pad_id]*2
+            words = [ str(int(w)) for w in words]
+            # conver to word from ids
+            #words = [ self.word_dict_inv[w] if w in self.word_dict_inv  else self.word_dict_inv[word_pad_id] for w in words]
+            words = [ self.word_dict_inv[w] for w in words]
 
-            for i in range(2, len(words_pad)-2):
-                feat_w_ids = [words_pad[i-2], words_pad[i-1], words_pad[i], words_pad[i+1], words_pad[i+2]]
-                feat_t_ids = [tags[i-2], tags[i-1]]
+            #words_pad = [word_pad_id]*2 + words + [word_pad_id]*2
 
-                #print(feat_w)
-                feat_w_ids = np.array(feat_w_ids)
-                feat_t_ids = np.array(feat_t_ids) 
+            #tags = [tag_pad_id]*2
 
-                feat = np.concatenate((feat_w_ids, feat_t_ids), axis=0)
-                feat = np.reshape(feat, (1,-1))
-                tag_pred = self.tagger.predict(feat)
+            tag_pred = self.tagger.tag(words)
+            tag_pred = [ self.tag_dict[w] for w in tag_pred]
+            self.tags[sent_id,:int(self.sent_lens[sent_id])] = tag_pred
 
-                self.tags[sent_id, i-2] = tag_pred
-                tags = tags + [tag_pred]
         """
-        
         # Find tags using the tagger    
         x_parser, y_parser = self.generate_data_for_parser(self.word_ids, self.tags, self.gold_tree, self.sent_lens, tag_pad_id, word_pad_id)
 

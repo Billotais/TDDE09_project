@@ -21,7 +21,7 @@ if len(sys.argv) != 2:
 config = json.loads(open(sys.argv[1]).read())
 
 tagger = Tagger(config)
-tagger.train(load_data=False)
+tagger.train(load_data=True)
 logging.info('Training Done')
 
 parser = Parser(config, tagger)
