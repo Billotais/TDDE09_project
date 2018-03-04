@@ -1,4 +1,3 @@
-
 # Abstract
 
 From the baseline system, we decided to develop two different independent systems. 
@@ -84,6 +83,8 @@ To load a trained mode
 
 We got the following results with our parser using the simple Perceptron : 
 
+## Resuts with Beam search on training and parsing
+
 #### English (on en-ud-dev.conllu)
 
 | Beam size  |Tagging accuracy|Unlabelled attachement score|Exact Matches|
@@ -122,7 +123,7 @@ We got the following results with our parser using the simple Perceptron :
 
 
 
-## (Old values with not correct beam search)
+## Beam search with only parsing
 
 #### English
 | Beam size  |Tagging accuracy|Unlabelled attachement score|Exact Matches|
@@ -154,7 +155,7 @@ We got the following results with our parser using the simple Perceptron :
 |64          |96.57%          |72.59%                      |18.65%       |
 
 
-# Abstract
+# Milestones
 
 Feature engineering on the parser : 
 
