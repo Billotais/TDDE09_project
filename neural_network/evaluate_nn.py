@@ -25,7 +25,7 @@ tagger.train(load_data=True)
 logging.info('Training Done')
 
 parser = Parser(config, tagger)
-parser.train(load_data=False)
+parser.train(load_data=True)
 logging.info('Training Done')
 
 dev_data = load_data('../../UD_English-EWT/en-ud-test.conllu')

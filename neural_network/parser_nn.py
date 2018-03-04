@@ -67,7 +67,6 @@ class Parser():
 
         # Conver words to ids
         words = [ self.word_dict[w] if w in self.word_dict  else word_pad_id for w in words]
-
         # Convert tags to ids
         tags_ids = [self.tag_dict[t] for t in tags]
 

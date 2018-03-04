@@ -23,9 +23,9 @@ config = json.loads(open(sys.argv[1]).read())
 config_nn = json.loads(open("./neural_network/train_nn_config.json").read())
 if config['tagger'] == 'LSTM':
     config_lstm = json.loads(open("./lstm/train_config_lstm.json").read())
-    x_embeddings, x, _, tags, _, _, tag_dict_inv, sent_lens = load_processed_data(config_stm['processed_test_data_location'])
+    x_embeddings, x, _, tags, word_dict, _, tag_dict_inv, sent_lens = load_processed_data(config_stm['processed_test_data_location'])
     logging.info("Data loaded")
-    tagger = BiLSTM(config_lstm, tag_dict_inv, x.shape[1], x_embeddings, len(tag_dict_inv))
+    tagger = BiLSTM(config_lstm, tag_dict_inv, x.shape[1], x_embeddings, len(tag_dict_inv), word_dict)
     tagger.restore_sess()
     logging.info("Session restored!")
 else:
@@ -34,7 +34,7 @@ else:
 logging.info('Training Done')
 
 parser = Parser(config_nn, tagger)
-parser.train(load_data=False)
+parser.train(load_data=True)
 logging.info('Training Done')
 
 dev_data = load_data('../../UD_English-EWT/en-ud-test.conllu')

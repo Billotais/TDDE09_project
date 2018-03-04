@@ -9,10 +9,11 @@ logging.getLogger().setLevel(logging.INFO)
 
 
 class BiLSTM(GenericModel):
-    def __init__(self, config, tag_dict_inv, sent_len, embeddings, n_tags):
+    def __init__(self, config, tag_dict_inv, sent_len, embeddings, n_tags, word_dict):
         super().__init__(config)
         self.tag_dict_inv = tag_dict_inv
         self.sent_len = sent_len
+        self.word_dict = word_dict
 
         # Def placeholders for the computational graph
         self.word_ids = tf.placeholder(tf.int32, shape=[None, sent_len],
@@ -129,6 +130,7 @@ class BiLSTM(GenericModel):
 
     def tag(self, sentence):
         '''Returns list of tags'''
-        pred_ids, _ = self.predict_batch(sentence, 1)
+        sentence = [ self.word_dict[w] if w in self.word_dict  else self.word_dict['<PAD/>'] for w in sentence]
+        pred_ids, _ = self.predict_batch(sentence, len(sentence))
         pred_tags = [self.tag_dict_inv[idx] for idx in list(pred_ids[0])]
         return pred_tags
