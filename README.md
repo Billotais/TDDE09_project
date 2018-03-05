@@ -9,6 +9,16 @@ On one hand, we kept the perceptron and modified the training and the prediction
 On the other hand, we replaced the perceptron with a neural network for both the part-of-speech tagger as well as the syntactic parser. Hereby, we achieved reasonably good scores. However, for the part-of-speech tagger, they are still lower than with the feature engineering. 
 
 In our project, we show that by adding an approach from an existing paper to the system the score is not always improved. On the contrary, it seems that most approaches only lead to an improvement in the specific setup used for the paper. 
+
+# References
+NN tagging and parsing: https://cs.stanford.edu/~danqi/papers/emnlp2014.pdf
+
+LSTM POS tagging: https://arxiv.org/pdf/1510.06168.pdf
+
+Non-projective dependency parsing: https://aclweb.org/anthology/P09-1040
+
+Beam search: https://aclweb.org/anthology/D08-1059
+
 # Get up and running
 This is a guide to get started as quickly as possible with the advanced system,
 for a more detailed explanation of each class, refer to the
@@ -55,9 +65,6 @@ To run the parser, run
  <br> 
 The system can be run with either simple neural network based tagger, biLSTM based tagger or perceptron based tagger. Select the tagger by setting the tagger field in eval_config.json to either LSTM, NN or Perceptron. 
 Note: The neural network based system is only supported for the english tree bank. <br> <br>
-The neural network tagger and parser are based on the following paper: https://cs.stanford.edu/~danqi/papers/emnlp2014.pdf <br>
-The LSTM tagger is based on the following paper: https://arxiv.org/pdf/1510.06168.pdf
-
 
 ## Results
 With the biLSTM based tagger, we get 89.84 % tagging accuracy on the test set.   
