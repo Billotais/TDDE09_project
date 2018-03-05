@@ -54,8 +54,10 @@ To run the parser, run
 `$ python3 evaluate_nn.py ./eval_config.json`  
  <br> 
 The system can be run with either simple neural network based tagger, biLSTM based tagger or perceptron based tagger. Select the tagger by setting the tagger field in eval_config.json to either LSTM, NN or Perceptron. 
-Note: The neural network based system is only supported for the english tree bank. <br>
+Note: The neural network based system is only supported for the english tree bank. <br> <br>
+The neural network tagger and parser are based on the following paper: https://cs.stanford.edu/~danqi/papers/emnlp2014.pdf
 The LSTM tagger is based on the following paper: https://arxiv.org/pdf/1510.06168.pdf
+
 
 ## Results
 With the biLSTM based tagger, we get 89.84 % tagging accuracy on the test set.   
