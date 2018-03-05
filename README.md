@@ -47,7 +47,7 @@ with Python 3.6. For the neural network based system, tensorflow is required.
 
 `$ git clone https://github.com/UniversalDependencies/UD_German-GSD.git`
 
-### Clone the advances system:
+### Clone the advanced system:
 `$ git clone git@gitlab.ida.liu.se:nlp2018-group3/advanced-system.git`
 
 `$ cd advanced-system`
