@@ -1,3 +1,9 @@
 {
-"tagger":"LSTM"
+"test_data":"../UD_English-EWT/en-ud-test.conllu", 
+"train_data":"../UD_English-EWT/en-ud-train.conllu",  
+"tagger":"Perceptron",
+"LSTM_config":"./lstm/train_config_lstm.json",
+"NN_config":"./neural_network/train_nn_config.json",
+"train_tagger":true,
+"train_parser":true
 }

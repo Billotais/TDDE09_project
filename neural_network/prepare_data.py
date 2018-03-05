@@ -32,27 +32,3 @@ save_data_to_dir(make_dir(config['processed_dev_data_location']), x=x_dev, tags=
 save_data_to_dir(make_dir(config['processed_test_data_location']), x_embeddings_test, x_test, y_test, tags_test, voc_test, voc_inv_test, tag_dict_test, tag_dict_inv_test, sent_lens_test, tree_dev)
 
 
-
-#with open(trained_dir + 'x.pickle', 'wb') as outfile:
-#    pickle.dump(x, outfile, pickle.HIGHEST_PROTOCOL)
-#    logging.info('Data matrix X saved')
-#
-#with open(trained_dir + 'y_onehot.pickle', 'wb') as outfile:
-#    pickle.dump(y_onehot, outfile, pickle.HIGHEST_PROTOCOL)
-#    logging.info('One hot matrix y saved')
-#
-#with open(trained_dir + 'tags.pickle', 'wb') as outfile:
-#    pickle.dump(tags, outfile, pickle.HIGHEST_PROTOCOL)
-#    logging.info('Data matrix y saved')
-#
-#with open(trained_dir + 'voc.json', 'w',encoding='utf-8') as outfile:
-#    json.dump(voc, outfile, indent=4, ensure_ascii=False)
-#    logging.info('Voc dict saved')
-#
-#with open(trained_dir + 'voc_inv.json', 'w',encoding='utf-8') as outfile:
-#    json.dump(voc_inv, outfile, indent=4, ensure_ascii=False)
-#    logging.info('Voc_inv dict saved')
-#
-#with open(trained_dir + 'tag_dict_inv.json', 'w',encoding='utf-8') as outfile:
-#    json.dump(tag_dict_inv, outfile, indent=4, ensure_ascii=False)
-#    logging.info('Tag dict saved')

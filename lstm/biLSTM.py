@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 from tensorflow.contrib import rnn
 from tensorflow.contrib import crf
-from generic_model import GenericModel
+from lstm.generic_model import GenericModel
 import logging
 
 logging.getLogger().setLevel(logging.INFO)
@@ -130,7 +130,12 @@ class BiLSTM(GenericModel):
 
     def tag(self, sentence):
         '''Returns list of tags'''
-        sentence = [ self.word_dict[w] if w in self.word_dict  else self.word_dict['<PAD/>'] for w in sentence]
-        pred_ids, _ = self.predict_batch(sentence, len(sentence))
-        pred_tags = [self.tag_dict_inv[idx] for idx in list(pred_ids[0])]
+        sentence = [ self.word_dict[w] if w in self.word_dict  else 0 for w in sentence]
+        sent_len = len(sentence)
+        sentence = sentence + [self.word_dict['<PAD/>']]*(159-sent_len)
+        sentence = np.reshape(sentence,(1,159))
+        sent_len_r = np.reshape(sent_len, (1))
+        pred_ids = self.predict_batch(sentence, sent_len_r)
+        pred_tags = [self.tag_dict_inv[str(idx)] for idx in list(pred_ids[0])]
+        pred_tags = pred_tags[:sent_len]
         return pred_tags

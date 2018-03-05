@@ -1,0 +1,8 @@
+{
+  "embedding_dim": 300,
+  "wv_location": "./data/GoogleNews.bin.gz",
+  "emb_limit": 1500000,
+  "processed_data_location": "./preprocessed_data/train/",
+  "processed_dev_data_location": "./preprocessed_data/dev/",
+  "processed_test_data_location":"./preprocessed_data/test/"
+}

@@ -1,10 +1,10 @@
-from NeuralNetwork import NeuralNetwork
+from neural_network.NeuralNetwork import NeuralNetwork
 from math import log
 import tensorflow as tf
-from data_utils import *
-from NeuralNetwork import NeuralNetwork
+from neural_network.data_utils import *
+from neural_network.NeuralNetwork import NeuralNetwork
 
-class Tagger():
+class TaggerNN():
     def __init__(self, config):
         """Initialises a new parser."""
         self.config = config['tagger']
@@ -39,7 +39,7 @@ class Tagger():
         feat_t = [bm2_t, bm1_t]
 
 
-        feat_w_ids = [ self.word_dict[w] if w in self.word_dict  else self.word_dict[word_pad] for w in feat_w]
+        feat_w_ids = [ self.word_dict[w] if w in self.word_dict  else 0 for w in feat_w]
         feat_w_ids = np.array(feat_w_ids)
 
         feat_t_ids = [self.tag_dict[t] for t in feat_t]
@@ -63,7 +63,7 @@ class Tagger():
 
         return pred_tags
 
-    def train(self, load_data=False):
+    def train(self, train=True):
         """Trains the parser on training data.
 
         Args:
@@ -78,7 +78,7 @@ class Tagger():
 
         self.classifier = NeuralNetwork(self.config, self.x_embeddings, self.tags_embeddings, len(self.tag_dict_inv), feature_type = 'tagger_1')
         
-        if load_data:
+        if not train:
             self.classifier.restore_sess()
         else:
             logging.info('Training NN for tagger!')

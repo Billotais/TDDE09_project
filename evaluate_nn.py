@@ -1,43 +1,61 @@
-from tagger_nn import Tagger
-from parser_nn import Parser
+from neural_network.tagger import TaggerNN
+from neural_network.parser import ParserNN
+from perceptron.tagger import Tagger
 import logging
 import json
 import sys
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
-from data_utils import *
+from lstm.data_utils import *
 import itertools, pickle, argparse
-from neuralNetwork/NeuralNetwork import NeuralNetwork
-from lstm/biLSTM import BiLSTM
-from nlp_tools import load_data, accuracy, get_sentences, get_tags, get_trees
+from neural_network.NeuralNetwork import NeuralNetwork
+from lstm.biLSTM import BiLSTM
+from neural_network.nlp_tools import load_data, accuracy, get_sentences, get_tags, get_trees
 
-logging.getLogger().setLevel(logging.INFO)
-
-
-logging.getLogger().setLevel(logging.INFO)
 
 if len(sys.argv) != 2:
     exit("Usage:\n python train.py [path to config file] ")
 
+
+logging.getLogger().setLevel(logging.INFO)
+
+
 config = json.loads(open(sys.argv[1]).read())
-config_nn = json.loads(open("./neural_network/train_nn_config.json").read())
+config_nn = json.loads(open(config['NN_config']).read())
+
+# Load tagger
 if config['tagger'] == 'LSTM':
-    config_lstm = json.loads(open("./lstm/train_config_lstm.json").read())
-    x_embeddings, x, _, tags, word_dict, _, tag_dict_inv, sent_lens = load_processed_data(config_stm['processed_test_data_location'])
+    config_lstm = json.loads(open(config['LSTM_config']).read())
+    x_embeddings, x, _, tags, word_dict, _, tag_dict_inv, sent_lens = load_processed_data(config_lstm['processed_data_location'])
+    x_dev, tags_dev, sent_lens_dev = load_processed_data(config_lstm['processed_dev_data_location'], True)
+
     logging.info("Data loaded")
-    tagger = BiLSTM(config_lstm, tag_dict_inv, x.shape[1], x_embeddings, len(tag_dict_inv), word_dict)
-    tagger.restore_sess()
-    logging.info("Session restored!")
+    tagger = BiLSTM(config_lstm, tag_dict_inv, x.shape[1], x_embeddings, len(tag_dict_inv),word_dict)
+
+    if config['train_tagger']:
+        logging.info("Training LSTM")
+        tagger.train(x, tags, x_dev, tags_dev, sent_lens, sent_lens_dev)
+        logging.info("Finished training")
+    else:    
+        tagger.restore_sess()
+        logging.info("Session restored!")
+elif config['tagger'] == 'NN':
+    tagger = TaggerNN(config_nn)
+    tagger.train(train=config['train_tagger'])
+elif config['tagger'] == 'Perceptron': 
+    tagger = Tagger()
+    train_data = load_data(config['train_data'])
+    tagger.train(train_data, n_epochs=3, trunc_data=0)
 else:
-    tagger = Tagger(config)
-    tagger.train(load_data=False)
-logging.info('Training Done')
+    exit("Usage:\n Undefined tagger. Should be either LSTM, NN or Perceptron ")
 
-parser = Parser(config_nn, tagger)
-parser.train(load_data=True)
-logging.info('Training Done')
+logging.info('Loaded tagger')
 
-dev_data = load_data('../../UD_English-EWT/en-ud-test.conllu')
+parser = ParserNN(config_nn, tagger)
+parser.train(train=config['train_parser'])
+logging.info('Loaded parser')
+
+dev_data = load_data(config['test_data'])
 gold_tags = list(itertools.chain(*get_tags(dev_data)))
 gold_trees = list(itertools.chain(*get_trees(dev_data)))
 pred_tags_lst = []
@@ -48,7 +66,7 @@ correction = 0
 
 for i, sentence in enumerate(get_sentences(dev_data)):
     print("\rEvaluated with sentence #{}".format(i), end="")
-    # Hack to remove root
+    # Hack to remove root since in the preprocessing, we used <PAD/> to denote <ROOT>
     sentence[0] = '<PAD/>'
     (pred_tags, pred_tree) = parser.parse(sentence)
     pred_tags[0] = '<ROOT>'

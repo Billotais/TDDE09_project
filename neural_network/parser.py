@@ -1,11 +1,11 @@
-from NeuralNetwork import NeuralNetwork
-from nlp_tools import softmax, get_sentences, get_tags, get_trees
+from neural_network.NeuralNetwork import NeuralNetwork
+from neural_network.nlp_tools import softmax, get_sentences, get_tags, get_trees
 from math import log
 import tensorflow as tf
-from data_utils import *
-from NeuralNetwork import NeuralNetwork
+from neural_network.data_utils import *
+from neural_network.NeuralNetwork import NeuralNetwork
 
-class Parser():
+class ParserNN():
     """A transition-based dependency parser.
 
     This parser implements the arc-standard algorithm for dependency
@@ -60,13 +60,14 @@ class Parser():
             dependency tree for the input sentence.
         """
 
+
         tags = self.tagger.tag(words)
 
         word_pad_id = self.word_dict['<PAD/>']
         tag_pad_id = self.tag_dict['<PAD/>']
 
         # Conver words to ids
-        words = [ self.word_dict[w] if w in self.word_dict  else word_pad_id for w in words]
+        words = [ self.word_dict[w] if w in self.word_dict  else 0 for w in words]
         # Convert tags to ids
         tags_ids = [self.tag_dict[t] for t in tags]
 
@@ -247,7 +248,7 @@ class Parser():
         """
         return feat
 
-    def train(self, load_data=False):
+    def train(self, train=False):
         """Trains the parser on training data.
 
         Args:
@@ -260,32 +261,26 @@ class Parser():
         word_pad_id = self.word_dict['<PAD/>']
         tag_pad_id = self.tag_dict['<PAD/>']
 
-        """
+
         # Find tags for training data
         for sent_id in range(self.tags.shape[0]):
             words = self.word_ids[sent_id, :int(self.sent_lens[sent_id])]
             words = words.tolist()
 
             words = [ str(int(w)) for w in words]
-            # conver to word from ids
-            #words = [ self.word_dict_inv[w] if w in self.word_dict_inv  else self.word_dict_inv[word_pad_id] for w in words]
             words = [ self.word_dict_inv[w] for w in words]
-
-            #words_pad = [word_pad_id]*2 + words + [word_pad_id]*2
-
-            #tags = [tag_pad_id]*2
 
             tag_pred = self.tagger.tag(words)
             tag_pred = [ self.tag_dict[w] for w in tag_pred]
             self.tags[sent_id,:int(self.sent_lens[sent_id])] = tag_pred
 
-        """
+
         # Find tags using the tagger    
         x_parser, y_parser = self.generate_data_for_parser(self.word_ids, self.tags, self.gold_tree, self.sent_lens, tag_pad_id, word_pad_id)
 
         self.classifier = NeuralNetwork(self.config, self.x_embeddings, self.tags_embeddings, 3, feature_type = 'parser_1') 
 
-        if load_data:
+        if not train:
             self.classifier.restore_sess()   
         else:
             num_data = x_parser.shape[0]

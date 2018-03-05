@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import logging
-from generic_model import GenericModel
+from neural_network.generic_model import GenericModel
 
 
 logging.getLogger().setLevel(logging.INFO)

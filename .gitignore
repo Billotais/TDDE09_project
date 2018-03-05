@@ -1,1 +1,6 @@
 __pycache__/
+lstm/model
+lstm/__pycache__
+neural_network/nn_model
+neural_network/preprocessed_data
+neural_network/__pycache__
