@@ -25,8 +25,8 @@ section “Run” below.
 
 ### Dependencies          
 In order to be able to run the model it is of course necessary
-to have all necessary packages installed. All of the packages needed come
-with Python 3.6.
+to have all necessary packages installed. All of the packages needed for the perceptron based systen come
+with Python 3.6. For the neural network based system, tensorflow is required.
 
 ### Clone the Universial Dependencies treebanks:
 `$ git clone https://github.com/UniversalDependencies/UD_Swedish-Talbanken.git`
@@ -43,14 +43,21 @@ with Python 3.6.
 `$ cd advanced-system`
 
 
-## LSTM using Tensorflow
-Prepare data <br>
-`$ python3 prepare_data.py ../UD_English-EWT/en-ud-train.conllu ../UD_English-EWT/en-ud-dev.conllu ../UD_English-EWT/en-ud-test.conllu ./train_config.json`
-<br>Train <br>
-`$ python3 train.py ./train_config.json` <br>
-Note the train.py trains and evaluates the LSTM tagger on the English dataset with an final accuracy of 89.84 % with the given settings.
+## Run the neural network based parser
+In order to run the neural network based parser, first pre-process the data by running the prepare_data script from the neural_network folder
+ <br>
+`$ python3 prepare_data.py ../../UD_English-EWT/en-ud-train-projective.conllu ../../UD_English-EWT/en-ud-dev.conllu ../../UD_English-EWT/en-ud-test.conllu ./data_config.json`
+<br> 
 
-## Run the parser
+To run the parser, run
+ <br>
+`$ python3 evaluate_nn.py ./eval_config.json`  
+ <br> 
+The system can be run with either simple neural network based tagger, biLSTM based tagger or perceptron based tagger. Select the tagger by setting the tagger field in eval_config.json to either LSTM, NN or Perceptron. 
+Note: The neural network based system is only supported for the english tree bank
+ 
+
+## Run the perceptron based parser
 In order to run the advanced system, simply run <br>
 `$ python3 evaluate_system.py --train ../UD_English-EWT/en-ud-train.conllu ../UD_English-EWT/en-ud-dev.conllu` 
 <br>for the English dataset,<br>
