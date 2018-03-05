@@ -55,7 +55,11 @@ To run the parser, run
  <br> 
 The system can be run with either simple neural network based tagger, biLSTM based tagger or perceptron based tagger. Select the tagger by setting the tagger field in eval_config.json to either LSTM, NN or Perceptron. 
 Note: The neural network based system is only supported for the english tree bank
- 
+
+## Results
+With the biLSTM based tagger, we get 89.84 % tagging accuracy on the test set.   
+With the neural network based parser, using the neural network based tagger, we get UAS of 77.4%   
+With the neural network based parser, using the perceptron based tagger, we get UAS of 78.76%
 
 ## Run the perceptron based parser
 In order to run the advanced system, simply run <br>
